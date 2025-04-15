@@ -50,5 +50,5 @@ class ControllerModel(BaseModel):
 
 
 class CommandModel(BaseModel):
-    device: str
+    device: int
     command: str  # 1 or 0

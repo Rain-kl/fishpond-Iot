@@ -66,8 +66,8 @@ def random_controller_data():
         id=controller['id'],
         name=controller['name'],
         icon=controller['icon'],
-        status=random.choice(['online', 'offline']),
-        isOn=random.choice([True, False])
+        status="online",
+        isOn=False
     ) for controller in available_device.controllers]
 
 
@@ -80,7 +80,7 @@ def generate_command(command: CommandModel) -> list | dict:
     """
 
     for controller in available_device.controllers:
-        if controller['name'] == command.device:
+        if controller['id'] == command.device:
             addr = controller['addr']
             cmd_value = "1" if command.command == "1" else "0"
             if cmd_value == "1":
@@ -96,13 +96,6 @@ def generate_command(command: CommandModel) -> list | dict:
                     "data": f"{{CD1={controller['position']},D1=?}}"
                 }
             return cmd_json
-
-    # 未找到匹配的控制器
-    return json.dumps({
-        "ok": False,
-        "message": f"未找到控制器: {command.device}",
-        "data": {"success": False}
-    })
 
 
 async def websocket_background_task(ws_client: WebSocketClient):

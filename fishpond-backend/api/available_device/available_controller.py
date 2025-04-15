@@ -14,8 +14,8 @@ controllers = [
         "icon": "valve-outlet.png",
         "status": "online",
         "isOn": False,
-        "addr": "00:12:4B:00:1F:5F:84:8C",
-        "position": "1",
+        "addr": "00:12:4B:00:07:5D:D7:D8",
+        "position": "2",
     },
     {
         "id": 3,
@@ -23,7 +23,7 @@ controllers = [
         "icon": "oxygen-machine.png",
         "status": "online",
         "isOn": False,
-        "addr": "00:12:4B:00:1F:5F:84:8C",
+        "addr": "00:12:4B:00:07:5D:D7:D8",
         "position": "1",
     },
     {
@@ -33,7 +33,7 @@ controllers = [
         "status": "online",
         "isOn": False,
         "addr": "00:12:4B:00:1F:5F:84:8C",
-        "position": "1",
+        "position": "3",
     },
     {
         "id": 5,
@@ -42,6 +42,6 @@ controllers = [
         "status": "offline",
         "isOn": False,
         "addr": "00:12:4B:00:1F:5F:84:8C",
-        "position": "1",
+        "position": "2",
     }
 ]
