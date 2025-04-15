@@ -10,6 +10,7 @@ class OK(BaseModel, Generic[T]):
     message: str = "ok"
     data: T
 
+
 # {
 #     id: 3,
 #     name: '水溶解氧',
@@ -31,7 +32,8 @@ class MonitorModel(BaseModel):
     min: float
     max: float
 
-  # {
+
+# {
 #   id: 1,
 #   name: '进水电磁阀',
 #   icon: 'valve-inlet.png',
@@ -45,3 +47,8 @@ class ControllerModel(BaseModel):
     icon: str
     status: str
     isOn: bool
+
+
+class CommandModel(BaseModel):
+    device: str
+    command: str  # 1 or 0

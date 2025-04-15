@@ -258,4 +258,4 @@ class ZXDataDB:
             return model
 
 
-zdb = ZXDataDB("data.db")
+zx_db = ZXDataDB("data.db")

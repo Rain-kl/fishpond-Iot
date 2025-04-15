@@ -54,5 +54,6 @@ class WebSocketClient:
             logger.success("Connection closed!")
 
 
-client = WebSocketClient()
+def create_client() -> WebSocketClient:
+    return WebSocketClient()
 

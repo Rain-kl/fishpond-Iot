@@ -4,34 +4,44 @@ controllers = [
         "name": "进水阀",
         "icon": "valve-inlet.png",
         "status": "online",
-        "isOn": False
+        "isOn": False,
+        "addr":"00:12:4B:00:1F:5F:84:8C",
+        "position": "1",
     },
     {
         "id": 2,
         "name": "出水阀",
         "icon": "valve-outlet.png",
         "status": "online",
-        "isOn": False
+        "isOn": False,
+        "addr": "00:12:4B:00:1F:5F:84:8C",
+        "position": "1",
     },
     {
         "id": 3,
         "name": "增氧机",
         "icon": "oxygen-machine.png",
         "status": "online",
-        "isOn": False
+        "isOn": False,
+        "addr": "00:12:4B:00:1F:5F:84:8C",
+        "position": "1",
     },
     {
         "id": 4,
         "name": "投饵机",
         "icon": "feeder.png",
         "status": "online",
-        "isOn": False
+        "isOn": False,
+        "addr": "00:12:4B:00:1F:5F:84:8C",
+        "position": "1",
     },
     {
         "id": 5,
         "name": "灯光",
         "icon": "light.png",
         "status": "offline",
-        "isOn": False
+        "isOn": False,
+        "addr": "00:12:4B:00:1F:5F:84:8C",
+        "position": "1",
     }
 ]

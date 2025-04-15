@@ -3,7 +3,7 @@ import time
 
 from loguru import logger
 from .model import ZXDataModel, ZXResponseModel
-from .ext import zx_db
+from .zdb import zx_db
 
 
 def parse_zx_data_json(zx_data_str: str):
