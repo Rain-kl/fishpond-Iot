@@ -43,8 +43,11 @@ export const controllerApi = {
   },
   
   // 控制设备开关
-  toggleDevice(deviceId, action) {
-    // 这里示例，实际接口路径需要根据后端API设计来确定
-    return api.post(`/controller/${deviceId}/${action}`);
+  toggleDevice(deviceId, command) {
+    // 根据curl请求的格式调整
+    return api.post('/controller/command', {
+      device: deviceId,
+      command: command
+    });
   }
 }; 

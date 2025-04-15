@@ -36,10 +36,10 @@ const toggleDevice = async (deviceId, action) => {
   const device = devices.value.find(d => d.id === deviceId);
   if (device) {
     try {
-      // 在实际应用中，可以取消注释以下代码，实现真实API调用
-      // await controllerApi.toggleDevice(deviceId, action);
+      // 根据curl格式发送请求，device=deviceId，command为0(关闭)或1(开启)
+      await controllerApi.toggleDevice(deviceId, action === 'on' ? '1' : '0');
       
-      // 暂时直接修改本地状态
+      // 更新本地状态
       if (action === 'on') {
         device.isOn = true;
       } else if (action === 'off') {
@@ -61,9 +61,9 @@ const setupAutoUpdate = () => {
   }
   
   // 设置每秒更新一次
-  updateInterval.value = setInterval(() => {
-    fetchControllerData();
-  }, 1000);
+  // updateInterval.value = setInterval(() => {
+  //   fetchControllerData();
+  // }, 1000);
 };
 
 // 组件挂载时获取数据并设置自动更新
