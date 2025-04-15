@@ -7,7 +7,9 @@ monitors = [
         "type": "temperature",
         "status": "online",
         "min": 0,
-        "max": 40
+        "max": 40,
+        "addr":"00:12:4B:00:1E:F9:FE:29",
+        "position":"A0"
     },
     {
         "id": 2,
@@ -17,7 +19,9 @@ monitors = [
         "type": "humidity",
         "status": "online",
         "min": 0,
-        "max": 100
+        "max": 100,
+        "addr": "00:12:4B:00:1E:F9:FC:CA",
+        "position": "A1"
     },
     {
         "id": 3,
@@ -27,7 +31,9 @@ monitors = [
         "type": "ph",
         "status": "online",
         "min": 0,
-        "max": 14
+        "max": 14,
+        "addr": "00:12:4B:00:1F:5F:82:23",
+        "position": "A0"
     },
     {
         "id": 4,
@@ -37,7 +43,9 @@ monitors = [
         "type": "oxygen",
         "status": "online",
         "min": 0,
-        "max": 10
+        "max": 10,
+        "addr": "00:12:4B:00:07:5D:D7:D8",
+        "position": "A6"
     },
     {
         "id": 5,
@@ -47,7 +55,9 @@ monitors = [
         "type": "light",
         "status": "offline",
         "min": 0,
-        "max": 1000
+        "max": 1000,
+        "addr": "00:12:4B:00:15:D1:5C:83",
+        "position": "A0"
     },
 
 ]
