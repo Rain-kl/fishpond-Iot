@@ -1,7 +1,10 @@
 # api/endpoints.py
+import json
+
 from fastapi import APIRouter, Request
-from pydantic import BaseModel
-from .ext import random_controller_data, get_monitor_data, ws_client, generate_command
+
+from core.zxcloud import create_client
+from .ext import random_controller_data, get_monitor_data, generate_command, global_ws_client
 from .model import OK, CommandModel
 
 router = APIRouter()
@@ -23,8 +26,11 @@ def get_controller(request: Request):
 @router.post("/controller/command")
 async def controller_command(request: Request, command: CommandModel):
     try:
-        if ws_client and ws_client.websocket:
-            await ws_client.send_data(generate_command(command))
+        ws_client = create_client()
+        await ws_client.connect()
+        if ws_client:
+            cmd_json = generate_command(command)
+            await ws_client.send_data(cmd_json)
             return OK(message="命令已发送", data={"success": True})
         else:
             return OK(message="WebSocket 未连接", data={"success": False})

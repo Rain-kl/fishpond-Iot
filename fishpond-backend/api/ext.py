@@ -10,7 +10,19 @@ from .model import CommandModel
 from core.zdb import zx_db
 from loguru import logger
 
-ws_client: WebSocketClient = None
+
+class GlobalWSClient:
+    def __init__(self):
+        self.client = None
+
+    def set_client(self, client: WebSocketClient):
+        self.client = client
+
+    def get_client(self):
+        return self.client
+
+
+global_ws_client = GlobalWSClient()
 
 
 def get_monitor_data():
@@ -59,33 +71,78 @@ def random_controller_data():
     ) for controller in available_device.controllers]
 
 
-def generate_command(command: CommandModel):
+def generate_command(command: CommandModel) -> list | dict:
     """
-    {"method":"control","addr":"00:12:4B:00:1F:5F:84:8C","data":"{OD=1,D1=?}"}
+    生成控制命令
+    {"method":"control","addr":"00:12:4B:00:1F:5F:84:8C","data":"{CD1=1}"}
     :param command:
     :return:
     """
+
     for controller in available_device.controllers:
         if controller['name'] == command.device:
             addr = controller['addr']
-            return json.dumps({
-                "method": "control",
-                "addr": addr,
-                "data": f"{{OD={controller['position']},D1=?}}"
-            })
+            cmd_value = "1" if command.command == "1" else "0"
+            if cmd_value == "1":
+                cmd_json = {
+                    "method": "control",
+                    "addr": addr,
+                    "data": f"{{OD1={controller['position']},D1=?}}"
+                }
+            else:
+                cmd_json = {
+                    "method": "control",
+                    "addr": addr,
+                    "data": f"{{CD1={controller['position']},D1=?}}"
+                }
+            return cmd_json
+
+    # 未找到匹配的控制器
+    return json.dumps({
+        "ok": False,
+        "message": f"未找到控制器: {command.device}",
+        "data": {"success": False}
+    })
 
 
-async def websocket_background_task():
-    global ws_client
-    ws_client = create_client()
-    await ws_client.connect("wss://api.zhiyun360.com:28090/")
+async def websocket_background_task(ws_client: WebSocketClient):
+    max_reconnect_interval = 60  # 最大重连间隔（秒）
 
+    # 连接成功后重置重试计数和间隔
+    retry_count = 0
+    reconnect_interval = 5
     while True:
         try:
+            # 接收消息
             response = await ws_client.receive_message()
-            parse_zx_response(response)
-            logger.debug(f"Received message: {response}")
+
+            # 如果成功接收到消息，则处理它
+            if response:
+                result = parse_zx_response(response)
+                if result:
+                    logger.debug(f"成功处理消息: {response}")
+                else:
+                    logger.warning(f"消息处理返回空结果: {response}")
+
+                # 成功处理消息后继续循环，不要重建连接
+                continue
+
         except Exception as e:
-            logger.error(f"WebSocket error: {e}")
-            await asyncio.sleep(5)  # 等待5秒后重连
-            await ws_client.connect("wss://api.zhiyun360.com:28090/")
+            logger.error(f"WebSocket error: {str(e)}")
+            retry_count += 1
+
+            # 安全地关闭连接
+            if ws_client:
+                try:
+                    await ws_client.close()
+                except Exception as close_error:
+                    logger.error(f"关闭连接出错: {str(close_error)}")
+                finally:
+                    ws_client = None
+
+            # 使用指数退避策略计算下次重连间隔
+            reconnect_interval = min(reconnect_interval * 1.5, max_reconnect_interval)
+            wait_time = reconnect_interval
+
+            logger.info(f"将在 {wait_time} 秒后尝试重新连接 (重试 #{retry_count})")
+            await asyncio.sleep(wait_time)
