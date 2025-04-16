@@ -48,3 +48,9 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -e .
 python run_server.py
 ```
+```bash
+# using uv
+cd fishpond-backend
+uv sync
+uv run run_server.py
+```
