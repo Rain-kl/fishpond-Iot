@@ -38,14 +38,14 @@
             <LineChart :chartData="oxygenChartData" :chartOptions="chartOptions" />
           </div>
         </el-tab-pane>
-        <el-tab-pane label="鱼塘水温" name="temperature">
+        <el-tab-pane label="鱼缸水温" name="temperature">
           <div class="chart-container">
             <LineChart :chartData="temperatureChartData" :chartOptions="chartOptions" />
           </div>
         </el-tab-pane>
-        <el-tab-pane label="鱼塘水位" name="waterLevel">
+        <el-tab-pane label="环境湿度" name="humidity">
           <div class="chart-container">
-            <LineChart :chartData="waterLevelChartData" :chartOptions="chartOptions" />
+            <LineChart :chartData="humidityChartData" :chartOptions="chartOptions" />
           </div>
         </el-tab-pane>
         <el-tab-pane label="水质PH" name="ph">
@@ -67,11 +67,11 @@ import { ElMessage } from 'element-plus'
 
 // 设备选项
 const deviceOptions = [
-  { value: '1', label: '光照度传感器' },
-  { value: '2', label: '溶解氧传感器' },
-  { value: '3', label: '水温传感器' },
-  { value: '4', label: '水位传感器' },
-  { value: '5', label: 'PH传感器' }
+  { value: '1', label: '鱼缸水温传感器' },
+  { value: '2', label: '环境湿度传感器' },
+  { value: '3', label: '水质PH传感器' },
+  { value: '4', label: '溶解氧传感器' },
+  { value: '5', label: '光照度传感器' }
 ]
 
 // 时间范围选项
@@ -127,11 +127,11 @@ const temperatureChartData = ref({
   ]
 })
 
-const waterLevelChartData = ref({
+const humidityChartData = ref({
   labels: [],
   datasets: [
     {
-      label: '水位 (cm)',
+      label: '湿度 (%)',
       data: [],
       borderColor: '#9E77ED',
       tension: 0.4
@@ -199,35 +199,7 @@ const updateChartData = () => {
   
   // 根据当前设备类型更新对应图表数据
   switch (selectedDevice.value) {
-    case '1': // 光照度
-      lightChartData.value = {
-        labels: times,
-        datasets: [
-          {
-            label: '光照度 (Lx)',
-            data: values,
-            borderColor: '#4B9EFA',
-            tension: 0.4
-          }
-        ]
-      }
-      activeTab.value = 'light'
-      break
-    case '2': // 溶解氧
-      oxygenChartData.value = {
-        labels: times,
-        datasets: [
-          {
-            label: '溶解氧 (mg/L)',
-            data: values,
-            borderColor: '#12B76A',
-            tension: 0.4
-          }
-        ]
-      }
-      activeTab.value = 'oxygen'
-      break
-    case '3': // 水温
+    case '1': // 鱼缸水温
       temperatureChartData.value = {
         labels: times,
         datasets: [
@@ -241,21 +213,21 @@ const updateChartData = () => {
       }
       activeTab.value = 'temperature'
       break
-    case '4': // 水位
-      waterLevelChartData.value = {
+    case '2': // 环境湿度
+      humidityChartData.value = {
         labels: times,
         datasets: [
           {
-            label: '水位 (cm)',
+            label: '湿度 (%)',
             data: values,
             borderColor: '#9E77ED',
             tension: 0.4
           }
         ]
       }
-      activeTab.value = 'waterLevel'
+      activeTab.value = 'humidity'
       break
-    case '5': // PH
+    case '3': // 水质PH
       phChartData.value = {
         labels: times,
         datasets: [
@@ -268,6 +240,34 @@ const updateChartData = () => {
         ]
       }
       activeTab.value = 'ph'
+      break
+    case '4': // 溶解氧
+      oxygenChartData.value = {
+        labels: times,
+        datasets: [
+          {
+            label: '溶解氧 (mg/L)',
+            data: values,
+            borderColor: '#12B76A',
+            tension: 0.4
+          }
+        ]
+      }
+      activeTab.value = 'oxygen'
+      break
+    case '5': // 光照度
+      lightChartData.value = {
+        labels: times,
+        datasets: [
+          {
+            label: '光照度 (Lx)',
+            data: values,
+            borderColor: '#4B9EFA',
+            tension: 0.4
+          }
+        ]
+      }
+      activeTab.value = 'light'
       break
   }
 }
