@@ -33,7 +33,7 @@ controllers = [
         "status": "online",
         "isOn": False,
         "addr": "00:12:4B:00:1F:5F:84:8C",
-        "position": "3",
+        "position": "4",
     },
     {
         "id": 5,
