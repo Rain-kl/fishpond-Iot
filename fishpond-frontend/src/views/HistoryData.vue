@@ -19,37 +19,37 @@
             :value="item.value"
           />
         </el-select>
-        <button class="query-button" @click="queryData">
+        <el-button type="primary" class="query-button" @click="queryData">
           <el-icon><Search /></el-icon>
           <span>查询</span>
-        </button>
+        </el-button>
       </div>
     </div>
 
-    <div class="chart-container">
-      <el-tabs v-model="activeTab">
+    <div class="chart-section">
+      <el-tabs v-model="activeTab" class="data-tabs">
         <el-tab-pane label="光照度" name="light">
-          <div class="chart-wrapper">
+          <div class="chart-container">
             <LineChart :chartData="lightChartData" :chartOptions="chartOptions" />
           </div>
         </el-tab-pane>
         <el-tab-pane label="溶解氧" name="oxygen">
-          <div class="chart-wrapper">
+          <div class="chart-container">
             <LineChart :chartData="oxygenChartData" :chartOptions="chartOptions" />
           </div>
         </el-tab-pane>
         <el-tab-pane label="鱼塘水温" name="temperature">
-          <div class="chart-wrapper">
+          <div class="chart-container">
             <LineChart :chartData="temperatureChartData" :chartOptions="chartOptions" />
           </div>
         </el-tab-pane>
         <el-tab-pane label="鱼塘水位" name="waterLevel">
-          <div class="chart-wrapper">
+          <div class="chart-container">
             <LineChart :chartData="waterLevelChartData" :chartOptions="chartOptions" />
           </div>
         </el-tab-pane>
         <el-tab-pane label="水质PH" name="ph">
-          <div class="chart-wrapper">
+          <div class="chart-container">
             <LineChart :chartData="phChartData" :chartOptions="chartOptions" />
           </div>
         </el-tab-pane>
@@ -290,17 +290,22 @@ watch(activeTab, (newTab) => {
 .page-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
+  height: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 16px;
 }
 
 .page-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
@@ -309,6 +314,7 @@ watch(activeTab, (newTab) => {
 .header-actions {
   display: flex;
   gap: 12px;
+  align-items: center;
 }
 
 .duration-select,
@@ -319,49 +325,67 @@ watch(activeTab, (newTab) => {
 .query-button {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background-color: #4B9EFA;
-  border: none;
-  border-radius: 6px;
-  color: white;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  gap: 5px;
+  font-weight: 500;
 }
 
-.query-button:hover {
-  background-color: #3A7FD5;
-}
-
-.query-button .el-icon {
-  font-size: 16px;
-}
-
-.chart-container {
+.chart-section {
+  flex: 1;
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
-  padding: 30px;
-  min-height: 430px;
-}
-
-.chart-wrapper {
-  height: 350px;
-  margin-top: 5px;
-  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.05);
 }
 
-/* 确保每个tab面板都是相同大小 */
+.data-tabs {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.el-tabs__header) {
+  margin-bottom: 0;
+  padding: 0 20px;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #eaedf0;
+}
+
+:deep(.el-tabs__item) {
+  height: 50px;
+  font-size: 15px;
+  color: #64748b;
+  transition: all 0.2s;
+  padding: 0 20px;
+}
+
+:deep(.el-tabs__item.is-active) {
+  color: #4B9EFA;
+  font-weight: 600;
+}
+
+:deep(.el-tabs__active-bar) {
+  background-color: #4B9EFA;
+  height: 3px;
+  border-radius: 3px;
+}
+
 :deep(.el-tabs__content) {
-  height: 450px;
+  flex: 1;
+  padding: 20px;
+  overflow: hidden;
 }
 
 :deep(.el-tab-pane) {
   height: 100%;
+}
+
+.chart-container {
+  height: calc(100vh - 220px);
+  min-height: 400px;
+  width: 100%;
+  border-radius: 8px;
 }
 
 @media (max-width: 768px) {
@@ -373,12 +397,23 @@ watch(activeTab, (newTab) => {
 
   .header-actions {
     width: 100%;
-    flex-direction: column;
+    flex-wrap: wrap;
   }
 
   .duration-select,
   .device-select {
-    width: 100%;
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .chart-container {
+    height: calc(100vh - 280px);
+    min-height: 300px;
+  }
+  
+  :deep(.el-tabs__item) {
+    padding: 0 10px;
+    font-size: 14px;
   }
 }
 </style> 
