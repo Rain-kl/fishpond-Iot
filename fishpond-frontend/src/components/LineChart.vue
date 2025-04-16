@@ -42,22 +42,79 @@ const initChart = () => {
   window.addEventListener('resize', resizeChart)
 }
 
+// 更新图表并强制重新渲染
+const forceRefresh = () => {
+  if (chartInstance) {
+    chartInstance.dispose()
+    setTimeout(() => {
+      if (chartContainer.value) {
+        chartInstance = echarts.init(chartContainer.value, null, {
+          renderer: 'canvas',
+          useDirtyRect: true
+        })
+        updateChart()
+      }
+    }, 50)
+  }
+}
+
 // 更新图表数据和配置
 const updateChart = () => {
   if (!chartInstance) return
   
   // 准备数据
   const { labels = [], datasets = [] } = props.chartData
+  
+  // 检查是否有有效数据
+  const hasValidData = labels.length > 0 && datasets.some(dataset => 
+    dataset.data && dataset.data.length > 0
+  )
+  
+  // 如果没有数据，添加"暂无数据"提示
+  if (!hasValidData) {
+    chartInstance.setOption({
+      graphic: [{
+        type: 'text',
+        left: 'center',
+        top: 'middle',
+        style: {
+          text: '暂无数据',
+          fontSize: 12,
+          fill: '#999',
+          fontWeight: 'normal'
+        }
+      }],
+      xAxis: {
+        type: 'category',
+        data: [''],
+        axisLine: {
+          lineStyle: { color: '#eee' }
+        },
+        axisLabel: { show: false },
+        axisTick: { show: false }
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisLabel: { show: false },
+        splitLine: { show: false },
+        axisTick: { show: false }
+      },
+      series: []
+    }, true)
+    return
+  }
+  
   const series = datasets.map(dataset => ({
     name: dataset.label,
     type: 'line',
     data: dataset.data,
     smooth: true,
     symbol: 'emptyCircle',
-    symbolSize: 3,
+    symbolSize: 2,
     showSymbol: false,
     lineStyle: {
-      width: 2,
+      width: 1.5,
       color: dataset.borderColor
     },
     itemStyle: {
@@ -122,21 +179,21 @@ const updateChart = () => {
     },
     legend: {
       data: datasets.map(d => d.label),
-      top: '10px',
+      top: '1px',
       textStyle: {
-        fontSize: 11,
+        fontSize: 16,
         color: '#666'
       },
       icon: 'circle',
-      itemWidth: 8,
-      itemHeight: 8,
-      itemGap: 12
+      itemWidth: 5,
+      itemHeight: 5,
+      itemGap: 8
     },
     grid: {
       left: '5%',
       right: '5%',
-      bottom: '8%',
-      top: '60px',
+      bottom: '25%',
+      top: '30px',
       containLabel: true
     },
     xAxis: {
@@ -150,13 +207,13 @@ const updateChart = () => {
       },
       axisLabel: {
         color: '#666',
-        fontSize: 11,
-        margin: 12,
-        rotate: labels.length > 20 ? 45 : 0,
+        fontSize: 10,
+        margin: 10,
+        rotate: labels.length > 15 ? 45 : 0,
+        interval: labels.length > 30 ? 'auto' : 0,
         formatter: function (value) {
-          // 如果标签太多，截断显示
           if (labels.length > 30) {
-            return value.slice(6); // 只显示时间部分
+            return value.slice(-5);
           }
           return value;
         }
@@ -175,8 +232,8 @@ const updateChart = () => {
       },
       axisLabel: {
         color: '#666',
-        fontSize: 11,
-        margin: 12
+        fontSize: 10,
+        margin: 10
       },
       axisLine: {
         show: false
@@ -185,7 +242,8 @@ const updateChart = () => {
         show: false
       }
     },
-    series: series
+    series: series,
+    graphic: []
   }
   
   // 合并自定义选项
@@ -207,7 +265,8 @@ const resizeChart = () => {
 
 // 监听数据变化
 watch(() => props.chartData, () => {
-  updateChart()
+  // 数据变化时，确保重新渲染图表
+  forceRefresh()
 }, { deep: true })
 
 // 监听配置变化

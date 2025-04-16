@@ -59,10 +59,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { historyApi } from '../api'
 import LineChart from '../components/LineChart.vue'
+import { ElMessage } from 'element-plus'
 
 // 设备选项
 const deviceOptions = [
@@ -86,7 +87,7 @@ const durationOptions = [
 
 const activeTab = ref('light')
 const selectedDevice = ref('1')
-const selectedDuration = ref('1hour')
+const selectedDuration = ref('12hour')
 const historyData = ref([])
 
 // 图表数据
@@ -170,6 +171,17 @@ const formatDateTime = (dateTimeStr) => {
 const queryData = async () => {
   try {
     const response = await historyApi.getHistoryData(selectedDevice.value, selectedDuration.value)
+    
+    // 检查是否有数据点
+    if (response.datapoints && response.datapoints.length === 0) {
+      // 使用Element Plus的消息提示
+      ElMessage({
+        message: '当前时间段无数据',
+        type: 'info',
+        duration: 3000
+      })
+    }
+    
     historyData.value = response.datapoints || []
     if (!historyData.value.length && response.datapoints) {
       historyData.value = response.datapoints
@@ -188,28 +200,73 @@ const updateChartData = () => {
   // 根据当前设备类型更新对应图表数据
   switch (selectedDevice.value) {
     case '1': // 光照度
-      lightChartData.value.labels = times
-      lightChartData.value.datasets[0].data = values
+      lightChartData.value = {
+        labels: times,
+        datasets: [
+          {
+            label: '光照度 (Lx)',
+            data: values,
+            borderColor: '#4B9EFA',
+            tension: 0.4
+          }
+        ]
+      }
       activeTab.value = 'light'
       break
     case '2': // 溶解氧
-      oxygenChartData.value.labels = times
-      oxygenChartData.value.datasets[0].data = values
+      oxygenChartData.value = {
+        labels: times,
+        datasets: [
+          {
+            label: '溶解氧 (mg/L)',
+            data: values,
+            borderColor: '#12B76A',
+            tension: 0.4
+          }
+        ]
+      }
       activeTab.value = 'oxygen'
       break
     case '3': // 水温
-      temperatureChartData.value.labels = times
-      temperatureChartData.value.datasets[0].data = values
+      temperatureChartData.value = {
+        labels: times,
+        datasets: [
+          {
+            label: '水温 (°C)',
+            data: values,
+            borderColor: '#F79009',
+            tension: 0.4
+          }
+        ]
+      }
       activeTab.value = 'temperature'
       break
     case '4': // 水位
-      waterLevelChartData.value.labels = times
-      waterLevelChartData.value.datasets[0].data = values
+      waterLevelChartData.value = {
+        labels: times,
+        datasets: [
+          {
+            label: '水位 (cm)',
+            data: values,
+            borderColor: '#9E77ED',
+            tension: 0.4
+          }
+        ]
+      }
       activeTab.value = 'waterLevel'
       break
     case '5': // PH
-      phChartData.value.labels = times
-      phChartData.value.datasets[0].data = values
+      phChartData.value = {
+        labels: times,
+        datasets: [
+          {
+            label: 'PH值',
+            data: values,
+            borderColor: '#F04438',
+            tension: 0.4
+          }
+        ]
+      }
       activeTab.value = 'ph'
       break
   }
@@ -219,6 +276,14 @@ const updateChartData = () => {
 onMounted(() => {
   queryData()
 })
+
+// 监听标签页变化，确保图表正确显示
+watch(activeTab, (newTab) => {
+  // 延迟执行以确保DOM已更新
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'));
+  }, 100);
+});
 </script>
 
 <style scoped>
@@ -277,16 +342,26 @@ onMounted(() => {
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
-  padding: 20px;
+  padding: 30px;
+  min-height: 430px;
 }
 
 .chart-wrapper {
-  height: 400px;
-  margin-top: 20px;
+  height: 350px;
+  margin-top: 5px;
   width: 100%;
   overflow: hidden;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(16, 24, 40, 0.05);
+}
+
+/* 确保每个tab面板都是相同大小 */
+:deep(.el-tabs__content) {
+  height: 450px;
+}
+
+:deep(.el-tab-pane) {
+  height: 100%;
 }
 
 @media (max-width: 768px) {
