@@ -12,8 +12,10 @@ RUN pnpm build
 # 构建阶段 - 后端
 FROM python:3.12-alpine AS backend-builder
 WORKDIR /app/backend
-# 更换 Alpine 源为清华镜像源
+# 更换 Alpine pypi 源为清华镜像源
 RUN sed -i 's#https\?://dl-cdn.alpinelinux.org/alpine#https://mirrors.tuna.tsinghua.edu.cn/alpine#g' /etc/apk/repositories
+RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+
 # 安装构建依赖
 RUN apk add --no-cache gcc musl-dev python3-dev
 COPY fishpond-backend/pyproject.toml ./
@@ -23,8 +25,9 @@ RUN pip install --no-cache-dir build && python -m build
 FROM python:3.12-alpine
 WORKDIR /app
 
-# 更换 Alpine 源为清华镜像源
+# 更换 Alpine pypi源为清华镜像源
 RUN sed -i 's#https\?://dl-cdn.alpinelinux.org/alpine#https://mirrors.tuna.tsinghua.edu.cn/alpine#g' /etc/apk/repositories
+RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 # 安装nginx和运行时依赖
 RUN apk add --no-cache nginx supervisor bash && \
     mkdir -p /run/nginx
