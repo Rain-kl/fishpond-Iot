@@ -2,7 +2,7 @@
 # wss://api.zhiyun360.com:28090/
 
 import json
-
+from config import uid,key
 import websockets
 from loguru import logger
 
@@ -13,8 +13,8 @@ class WebSocketClient:
         self.websocket = None
         self.authorization = {
             "method": "authenticate",
-            "uid": "780392644007",
-            "key": "dnsGB3p0dQAFBwN0RA1ABw0DDgw"
+            "uid": uid,
+            "key": key
         }
 
     async def connect(self):

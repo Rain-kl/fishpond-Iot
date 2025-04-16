@@ -2,8 +2,10 @@
 import json
 
 from fastapi import APIRouter, Request
-
+from config import uid
 from core.zxcloud import create_client
+import requests
+from . import available_device
 from .ext import random_controller_data, get_monitor_data, generate_command, global_ws_client
 from .model import OK, CommandModel
 
@@ -36,3 +38,15 @@ async def controller_command(request: Request, command: CommandModel):
             return OK(message="WebSocket 未连接", data={"success": False})
     except Exception as e:
         return OK(message=f"发送命令时出错: {str(e)}", data={"success": False})
+
+
+@router.get("/history")
+async def get_history(request: Request, device: int, duration):
+    for controller in available_device.monitors:
+        if controller['id'] == device:
+            addr = controller['addr']
+            position = controller['position']
+            url = f"http://api.zhiyun360.com:8080/v2/feeds/{uid}/datastreams/{addr}_{position}?duration={duration}"
+            rsp = requests.get(url)
+            return rsp.json()
+    pass

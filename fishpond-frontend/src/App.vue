@@ -44,21 +44,6 @@ let timer
 onMounted(() => {
   updateTime()
   timer = setInterval(updateTime, 60000) // 每分钟更新一次
-  // 模拟定时获取传感器数据
-  setInterval(() => {
-    sensors.value = sensors.value.map(sensor => {
-      // 模拟数据波动
-      const randomDelta = (Math.random() - 0.5) * 2
-      let newValue = sensor.value + randomDelta
-      newValue = Math.min(Math.max(newValue, sensor.min), sensor.max)
-
-      return {
-        ...sensor,
-        value: Number(newValue.toFixed(1)),
-        status: Math.random() > 0.2 ? 'online' : 'offline' // 随机在线状态
-      }
-    })
-  }, 5000)
 })
 
 onUnmounted(() => {

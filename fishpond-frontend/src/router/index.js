@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import RealTimeControl from '../views/RealTimeControl.vue'
 import RealTimeMonitor from '../views/RealTimeMonitor.vue'
+import HistoryData from '../views/HistoryData.vue'
 
 const routes = [
     {
         path: '/',
-        redirect: '/control'
+        redirect: '/monitor'
     },
     {
         path: '/control',
@@ -16,6 +17,11 @@ const routes = [
         path: '/monitor',
         name: 'RealTimeMonitor',
         component: RealTimeMonitor
+    },
+    {
+        path: '/history',
+        name: 'HistoryData',
+        component: HistoryData
     }
 ]
 

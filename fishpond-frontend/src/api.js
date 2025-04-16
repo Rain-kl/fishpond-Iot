@@ -12,10 +12,15 @@ const api = axios.create({
 // 响应拦截器，统一处理响应
 api.interceptors.response.use(
   response => {
+    // 对于返回ok字段的标准格式响应
     if (response.data && response.data.ok) {
       return response.data;
     }
-    return Promise.reject(new Error(response.data.message || '请求失败'));
+    // 对于没有ok字段但直接返回数据的响应（如历史数据接口）
+    if (response.data) {
+      return response.data;
+    }
+    return Promise.reject(new Error(response.data?.message || '请求失败'));
   },
   error => {
     console.error('接口请求错误:', error);
@@ -48,6 +53,21 @@ export const controllerApi = {
     return api.post('/controller/command', {
       device: deviceId,
       command: command
+    });
+  }
+};
+
+/**
+ * 历史数据相关API
+ */
+export const historyApi = {
+  // 获取历史数据
+  getHistoryData(deviceId, duration) {
+    return api.get(`/history`, {
+      params: {
+        device: deviceId,
+        duration: duration
+      }
     });
   }
 }; 
