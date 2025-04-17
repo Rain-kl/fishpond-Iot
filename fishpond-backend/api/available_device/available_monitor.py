@@ -43,7 +43,7 @@ monitors = [
         "type": "oxygen",
         "status": "online",
         "min": 0,
-        "max": 10,
+        "max": 15,
         "addr": "00:12:4B:00:07:5D:D7:D8",
         "position": "A6"
     },

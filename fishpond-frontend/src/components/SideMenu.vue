@@ -22,7 +22,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { Monitor, SetUp, Histogram } from '@element-plus/icons-vue'
+import { Monitor, SetUp, InfoFilled,Histogram } from '@element-plus/icons-vue'
 import fishLogo from '../assets/logo.png'
 
 const menuItems = ref([
@@ -40,6 +40,11 @@ const menuItems = ref([
     title: '历史数据',
     path: '/history',
     icon: Histogram
+  },
+  {
+    title: '关于我们',
+    path: '/about',
+    icon: InfoFilled
   }
 ])
 </script>

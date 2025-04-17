@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import RealTimeControl from '../views/RealTimeControl.vue'
 import RealTimeMonitor from '../views/RealTimeMonitor.vue'
 import HistoryData from '../views/HistoryData.vue'
+import AboutUs from '../views/AboutUs.vue'
 
 const routes = [
     {
@@ -17,6 +18,11 @@ const routes = [
         path: '/monitor',
         name: 'RealTimeMonitor',
         component: RealTimeMonitor
+    },
+    {
+        path: '/about',
+        name: 'AboutUs',
+        component: AboutUs
     },
     {
         path: '/history',
