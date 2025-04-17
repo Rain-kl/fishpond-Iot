@@ -52,3 +52,8 @@ class ControllerModel(BaseModel):
 class CommandModel(BaseModel):
     device: int
     command: str  # 1 or 0
+
+
+class TimedCMDModel(BaseModel):
+    device: int
+    duration: int

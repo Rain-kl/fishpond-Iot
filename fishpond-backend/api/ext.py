@@ -1,14 +1,16 @@
-import json
+import asyncio
 import random
 import time
-import asyncio
-from core.zxcloud import create_client, WebSocketClient
-from core.parser import parse_zx_response
-from .model import MonitorModel, ControllerModel
-import api.available_device as available_device
-from .model import CommandModel
-from core.zdb import zx_db
+from typing import Any
+
 from loguru import logger
+
+import api.available_device as available_device
+from core.parser import parse_zx_response
+from core.zdb import zx_db
+from core.zxcloud import WebSocketClient, create_client
+from .model import CommandModel
+from .model import MonitorModel, ControllerModel
 
 
 class GlobalWSClient:
@@ -71,7 +73,7 @@ def random_controller_data():
     ) for controller in available_device.controllers]
 
 
-def generate_command(command: CommandModel) -> list | dict:
+def generate_command(command: CommandModel) -> dict[str, str | Any] | None:
     """
     生成控制命令
     {"method":"control","addr":"00:12:4B:00:1F:5F:84:8C","data":"{CD1=1}"}
@@ -96,6 +98,7 @@ def generate_command(command: CommandModel) -> list | dict:
                     "data": f"{{CD1={controller['position']},D1=?}}"
                 }
             return cmd_json
+    return None
 
 
 async def websocket_background_task(ws_client: WebSocketClient):
@@ -139,3 +142,42 @@ async def websocket_background_task(ws_client: WebSocketClient):
 
             logger.info(f"将在 {wait_time} 秒后尝试重新连接 (重试 #{retry_count})")
             await asyncio.sleep(wait_time)
+
+
+async def timed_control(device_id: int, duration: int):
+    """
+    定时控制设备函数，开启设备后等待指定时间再关闭
+    :param device_id: 设备ID
+    :param duration: 运行时长（秒）
+    :return: 执行结果
+    """
+    try:
+        # 创建WebSocket客户端并连接
+        ws_client = create_client()
+        await ws_client.connect()
+
+        if not ws_client:
+            return {"success": False, "message": "WebSocket 连接失败"}
+
+        # 构建并发送开启命令
+        open_command = CommandModel(device=device_id, command="1")
+        open_cmd_json = generate_command(open_command)
+        if not open_cmd_json:
+            return {"success": False, "message": "无法找到指定设备"}
+
+        await ws_client.send_data(open_cmd_json)
+        logger.info(f"设备 {device_id} 已开启，将在 {duration} 秒后关闭")
+
+        # 等待指定时间
+        await asyncio.sleep(duration)
+
+        # 构建并发送关闭命令
+        close_command = CommandModel(device=device_id, command="0")
+        close_cmd_json = generate_command(close_command)
+        await ws_client.send_data(close_cmd_json)
+        logger.info(f"设备 {device_id} 已自动关闭")
+
+        return {"success": True, "message": "定时控制完成", "duration": duration}
+    except Exception as e:
+        logger.error(f"定时控制出错: {str(e)}")
+        return {"success": False, "message": f"定时控制出错: {str(e)}"}

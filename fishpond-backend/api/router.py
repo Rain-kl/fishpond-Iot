@@ -1,5 +1,4 @@
 # api/endpoints.py
-import json
 
 from fastapi import APIRouter, Request
 from config import uid
@@ -8,6 +7,8 @@ import requests
 from . import available_device
 from .ext import random_controller_data, get_monitor_data, generate_command, global_ws_client
 from .model import OK, CommandModel
+from .ext import random_controller_data, get_monitor_data, generate_command, timed_control
+from .model import OK, CommandModel, TimedCMDModel
 
 router = APIRouter()
 
@@ -38,6 +39,19 @@ async def controller_command(request: Request, command: CommandModel):
             return OK(message="WebSocket 未连接", data={"success": False})
     except Exception as e:
         return OK(message=f"发送命令时出错: {str(e)}", data={"success": False})
+
+
+@router.post("/controller/timed")
+async def timed_controller_command(request: Request, command: TimedCMDModel):
+    try:
+        # 调用 ext.py 中的定时控制函数
+        result = await timed_control(command.device, command.duration)
+        if result["success"]:
+            return OK(message="定时控制命令已执行", data=result)
+        else:
+            return OK(message=result["message"], data={"success": False})
+    except Exception as e:
+        return OK(message=f"执行定时控制时出错: {str(e)}", data={"success": False})
 
 
 @router.get("/history")
