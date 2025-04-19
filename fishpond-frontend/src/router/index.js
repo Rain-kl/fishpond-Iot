@@ -1,8 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 import RealTimeControl from '../views/RealTimeControl.vue'
 import RealTimeMonitor from '../views/RealTimeMonitor.vue'
 import HistoryData from '../views/HistoryData.vue'
 import AboutUs from '../views/AboutUs.vue'
+import GestureRecognize from "../views/GestureRecognize.vue";
 
 const routes = [
     {
@@ -28,6 +29,11 @@ const routes = [
         path: '/history',
         name: 'HistoryData',
         component: HistoryData
+    },
+    {
+        path: '/gesture',
+        name: 'GestureRecognize',
+        component: GestureRecognize
     }
 ]
 
