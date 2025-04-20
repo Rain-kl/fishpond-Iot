@@ -7,6 +7,8 @@ COPY fishpond-frontend/src ./src
 COPY fishpond-frontend/public ./public
 COPY fishpond-frontend/index.html ./
 COPY fishpond-frontend/vite.config.js ./
+# 设置 AI 服务 URL 环境变量用于前端构建
+ENV AI_SERVICE_URL=http://fishpond-ai:10099
 RUN pnpm build
 
 # 构建阶段 - 后端
@@ -19,18 +21,6 @@ RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/we
 # 安装构建依赖
 RUN apk add --no-cache gcc musl-dev python3-dev
 COPY fishpond-backend/pyproject.toml ./
-RUN pip install --no-cache-dir build && python -m build
-
-# 构建阶段 - AI 服务
-FROM python:3.12-alpine AS ai-builder
-WORKDIR /app/ai
-# 更换 Alpine pypi 源为清华镜像源
-RUN sed -i 's#https\?://dl-cdn.alpinelinux.org/alpine#https://mirrors.tuna.tsinghua.edu.cn/alpine#g' /etc/apk/repositories
-RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-
-# 安装构建依赖
-RUN apk add --no-cache gcc musl-dev python3-dev
-COPY fishpond-ai/pyproject.toml ./
 RUN pip install --no-cache-dir build && python -m build
 
 # 最终阶段
@@ -48,18 +38,8 @@ RUN apk add --no-cache nginx supervisor bash && \
 COPY --from=backend-builder /app/backend/dist/*.whl /tmp/
 RUN pip install --no-cache-dir /tmp/*.whl && rm /tmp/*.whl
 
-# 复制AI服务构建结果并安装
-COPY --from=ai-builder /app/ai/dist/*.whl /tmp/
-RUN pip install --no-cache-dir /tmp/*.whl && rm /tmp/*.whl
-
-# 安装 AI 服务特殊依赖
-RUN apk add --no-cache ffmpeg
-
 # 复制后端代码
 COPY fishpond-backend/ /app/backend/
-
-# 复制AI服务代码
-COPY fishpond-ai/ /app/ai/
 
 # 配置nginx
 RUN mkdir -p /var/www/html
@@ -73,7 +53,7 @@ RUN mkdir -p /etc/supervisor.d/
 COPY supervisord.conf /etc/supervisor.d/supervisord.ini
 
 # 暴露端口
-EXPOSE 80 10086 10099
+EXPOSE 80 10086
 
 # 启动命令
 CMD ["supervisord", "-c", "/etc/supervisor.d/supervisord.ini"]

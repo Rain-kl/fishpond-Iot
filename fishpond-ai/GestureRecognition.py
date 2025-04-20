@@ -12,36 +12,11 @@ class GestureRecognizer:
         # --- Configuration ---
         # 可调整的严格度
         self.STRICTNESS_LEVEL = 2  # 1=宽松, 2=中等, 3=严格, 4=非常严格
-
         self.strictness_presets = {
-            1: {  # 宽松模式
-                "confidence_threshold": 0.5,
-                "palm_facing_threshold": 0.3,
-                "stability_frames": 2,
-                "min_stability_score": 0.7,
-                "extension_ratio": 0.6
-            },
-            2: {  # 中等模式
-                "confidence_threshold": 0.6,
-                "palm_facing_threshold": 0.5,
-                "stability_frames": 3,
-                "min_stability_score": 0.8,
-                "extension_ratio": 0.7
-            },
-            3: {  # 严格模式
-                "confidence_threshold": 0.7,
-                "palm_facing_threshold": 0.7,
-                "stability_frames": 4,
-                "min_stability_score": 0.9,
-                "extension_ratio": 0.8
-            },
-            4: {  # 非常严格模式
-                "confidence_threshold": 0.8,
-                "palm_facing_threshold": 0.85,
-                "stability_frames": 5,
-                "min_stability_score": 0.95,
-                "extension_ratio": 0.9
-            }
+            1: {"stability_frames": 3, "min_stability_score": 0.7, "palm_facing_threshold": 0.1, "extension_ratio": 0.65, "confidence_threshold": 0.5},
+            2: {"stability_frames": 5, "min_stability_score": 0.75, "palm_facing_threshold": 0.2, "extension_ratio": 0.75, "confidence_threshold": 0.6},
+            3: {"stability_frames": 7, "min_stability_score": 0.8, "palm_facing_threshold": 0.3, "extension_ratio": 0.85, "confidence_threshold": 0.7},
+            4: {"stability_frames": 10, "min_stability_score": 0.85, "palm_facing_threshold": 0.4, "extension_ratio": 0.95, "confidence_threshold": 0.8}
         }
 
         # --- Initialization ---
@@ -56,11 +31,9 @@ class GestureRecognizer:
                                                 min_tracking_confidence=0.5)
 
         self.mp_drawing = mp.solutions.drawing_utils
-        self.cap = cv2.VideoCapture(0)
-
-        if not self.cap.isOpened():
-            print("错误：无法打开摄像头")
-            exit()
+        
+        # 不在初始化时打开摄像头，而是在需要时才打开
+        self.cap = None
 
         self.tip_ids = [4, 8, 12, 16, 20]  # 指尖关键点
         self.pTime = 0
@@ -346,75 +319,82 @@ class GestureRecognizer:
             print(f"严格度降低到: {self.STRICTNESS_LEVEL}/4")
 
     def run_on_image(self, image_path, no_display=False):
-        """加载并处理单个本地图像文件
-        
-        参数:
-            image_path: 图像文件路径
-            no_display: 是否禁用图像显示窗口，当API调用时应设为True
-        
-        返回:
-            recognition_result: 识别结果字符串
-        """
-        # 检查文件是否存在
-        if not os.path.exists(image_path):
-            print(f"错误：图像文件不存在 {image_path}")
-            return "null"
+        """处理单个图像文件"""
+        try:
+            img = cv2.imread(image_path)
+            if img is None:
+                print(f"无法读取图像: {image_path}")
+                return "错误：无法读取图像"
 
-        # 读取本地图像文件
-        img = cv2.imread(image_path)
+            # 处理图像并识别手势
+            result = self.process_frame(img, enable_stabilizer=False)
+            
+            # process_frame可能返回2个或5个值，需要检查
+            if isinstance(result, tuple) and len(result) == 5:
+                img, gesture, confidence, palm_facing, is_stable = result
+            else:
+                # 旧版本只返回img和gesture
+                img, gesture = result
+                
+            # 如果不显示，则直接返回识别结果
+            if no_display:
+                return gesture
 
-        # 检查图像是否成功加载
-        if img is None:
-            print(f"错误：无法读取图像文件 {image_path}，文件可能已损坏或格式不支持。")
-            return "null"
-
-        print(f"成功加载图像: {image_path}, 形状: {img.shape}")  # img 是一个 NumPy 数组
-
-        # 处理当前图像帧 (这里的 img 格式与原来 cap.read() 返回的 img 格式一致)
-        img_processed, recognition_result = self.process_frame(img, enable_stabilizer=False)
-        print(f"图像处理完成。识别结果: {recognition_result}")
-
-        # 仅在no_display为False时显示窗口
-        if not no_display:
-            # 显示处理后的图像
-            cv2.imshow("Hand Gesture Recognition Result", img_processed)
-
-            # 等待用户按键后关闭窗口
-            print("处理完成。按任意键关闭显示窗口...")
-            cv2.waitKey(0)  # 等待无限长时间，直到用户按下任意键
-            cv2.destroyAllWindows()  # 关闭所有 OpenCV 窗口
-
-        return recognition_result
+            # 显示结果
+            cv2.imshow("Image", img)
+            cv2.waitKey(0)
+            return gesture
+            
+        except Exception as e:
+            print(f"处理图像时出错: {str(e)}")
+            return "错误：处理图像失败"
 
     def run(self):
-        """主循环"""
-        while True:
-            success, img = self.cap.read()
-            if not success:
-                print("忽略空的摄像头帧.")
-                continue
+        """运行实时摄像头手势识别"""
+        try:
+            # 只在需要实时识别时才打开摄像头
+            self.cap = cv2.VideoCapture(0)
+            if not self.cap.isOpened():
+                print("错误：无法打开摄像头")
+                return False
+                
+            while True:
+                success, img = self.cap.read()
+                if not success:
+                    print("无法获取摄像头帧")
+                    break
 
-            # 处理当前帧
-            img, _ = self.process_frame(img)
+                img, gesture, confidence, palm_facing, is_stable = self.process_frame(img)
 
-            # 显示图像
-            cv2.imshow("Hand Gesture Recognition", img)
+                cTime = time.time()
+                fps = 1 / (cTime - self.pTime)
+                self.pTime = cTime
 
-            # 检测按键和退出条件
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):
-                break
-            else:
-                self.adjust_strictness(key)
+                cv2.putText(img, f'FPS: {int(fps)}', (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
 
-        # 释放资源
-        self.cleanup()
+                cv2.imshow("Image", img)
+                key = cv2.waitKey(1)
+
+                # ESC键退出
+                if key == 27:
+                    break
+                # 数字键调整严格度
+                elif 49 <= key <= 52:  # 1-4
+                    self.adjust_strictness(key)
+            
+            self.cleanup()
+            return True
+            
+        except Exception as e:
+            print(f"运行时出错: {str(e)}")
+            self.cleanup()
+            return False
 
     def cleanup(self):
-        """释放资源"""
-        self.cap.release()
+        """清理资源"""
+        if self.cap is not None and self.cap.isOpened():
+            self.cap.release()
         cv2.destroyAllWindows()
-        self.hands.close()
 
 
 if __name__ == "__main__":

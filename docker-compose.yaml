@@ -9,9 +9,23 @@ services:
     ports:
       - "80:80"   # 前端 Nginx
       - "10086:10086"  # 后端 API
-      - "10099:10099"  # AI 服务 API
     volumes:
       - ./fishpond-backend/data.db:/app/backend/data.db  # 持久化数据库文件
+    environment:
+      - AI_SERVICE_URL=http://fishpond-ai:10099  # AI 服务的地址
+    restart: unless-stopped
+    networks:
+      - fishpond-network
+    depends_on:
+      - fishpond-ai
+
+  fishpond-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile.ai
+    container_name: fishpond-ai
+    ports:
+      - "10099:10099"  # AI 服务 API
     restart: unless-stopped
     networks:
       - fishpond-network

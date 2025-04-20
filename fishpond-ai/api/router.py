@@ -64,16 +64,18 @@ async def process_camera_gesture(data: dict = Body(...)):
         with open(temp_file_path, "wb") as temp_file:
             temp_file.write(base64.b64decode(image_data))
         
-        # 初始化手势识别器
-        recognizer = GestureRecognizer()
-        
-        # 调用run_on_image方法进行手势识别
-        result = recognizer.run_on_image(temp_file_path, no_display=True)
-        
-        return JSONResponse(content={"gesture": result})
+        # 初始化手势识别器并处理图像
+        try:
+            recognizer = GestureRecognizer()
+            result = recognizer.run_on_image(temp_file_path, no_display=True)
+            return JSONResponse(content={"gesture": result})
+        except Exception as e:
+            print(f"处理图像时出错: {str(e)}")
+            return JSONResponse(content={"gesture": "错误", "error": str(e)})
     
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"处理失败: {str(e)}")
+        print(f"处理失败: {str(e)}")
+        return JSONResponse(content={"gesture": "错误", "error": str(e)})
     
     finally:
         # 清理临时文件
