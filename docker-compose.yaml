@@ -9,6 +9,7 @@ services:
     ports:
       - "80:80"   # 前端 Nginx
       - "10086:10086"  # 后端 API
+      - "10099:10099"  # AI 服务 API
     volumes:
       - ./fishpond-backend/data.db:/app/backend/data.db  # 持久化数据库文件
     restart: unless-stopped
