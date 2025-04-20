@@ -2,7 +2,7 @@
 # wss://api.zhiyun360.com:28090/
 
 import json
-from config import uid,key
+from config import uid, key
 import websockets
 from loguru import logger
 
@@ -64,6 +64,9 @@ class WebSocketClient:
                 logger.critical(f"连接已断开: {str(e)}")
                 # 不在这里自动重连，让调用者决定如何处理连接断开
                 return None
+        else:
+            logger.error("WebSocket连接不存在")
+            return None
 
     async def close(self):
         if self.websocket:

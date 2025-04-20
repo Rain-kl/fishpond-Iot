@@ -9,4 +9,5 @@ wheels/
 # Virtual environments
 .venv
 .idea
-/data.db
+/data/data.db
+/data/

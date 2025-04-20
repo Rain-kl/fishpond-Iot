@@ -1,13 +1,15 @@
 import sqlite3
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
+
+from config import db_path
 from .model import ZXDataModel
 
 
 class ZXDataDB:
     """ZXDataModel的数据库操作类"""
 
-    def __init__(self, db_path: str = "zx_data.db"):
+    def __init__(self, db_path: str = "data/zx_data.db"):
         """初始化数据库连接"""
         self.db_path = db_path
         self._create_table_if_not_exists()
@@ -22,22 +24,23 @@ class ZXDataDB:
         cursor = conn.cursor()
 
         cursor.execute('''
-        CREATE TABLE IF NOT EXISTS zx_data (
-            addr TEXT PRIMARY KEY,
-            TYPE TEXT,
-            PN TEXT,
-            A0 TEXT,
-            A1 TEXT,
-            A2 TEXT,
-            A3 TEXT,
-            A4 TEXT,
-            A5 TEXT,
-            A6 TEXT,
-            A7 TEXT,
-            D1 TEXT,
-            updated TEXT
-        )
-        ''')
+                       CREATE TABLE IF NOT EXISTS zx_data
+                       (
+                           addr    TEXT PRIMARY KEY,
+                           TYPE    TEXT,
+                           PN      TEXT,
+                           A0      TEXT,
+                           A1      TEXT,
+                           A2      TEXT,
+                           A3      TEXT,
+                           A4      TEXT,
+                           A5      TEXT,
+                           A6      TEXT,
+                           A7      TEXT,
+                           D1      TEXT,
+                           updated TEXT
+                       )
+                       ''')
 
         # 检查表中是否已经有A1-A3字段，如果没有则添加
         cursor.execute("PRAGMA table_info(zx_data)")
@@ -54,17 +57,17 @@ class ZXDataDB:
         conn.commit()
         conn.close()
 
-    def insert(self, addr: str, model: ZXDataModel) -> bool:
+    def insert(self, addr: str, model: ZXDataModel) -> bool | None:
         """插入一条记录，使用指定的addr作为主键，返回是否插入成功"""
         conn = self._get_connection()
         cursor = conn.cursor()
 
         try:
             cursor.execute('''
-            INSERT INTO zx_data (addr, TYPE, PN, A0, A1, A2, A3, A4, A5, A6, A7, D1, updated)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (addr, model.TYPE, model.PN, model.A0, model.A1, model.A2, model.A3,
-                  model.A4, model.A5, model.A6, model.A7, model.D1, model.updated))
+                           INSERT INTO zx_data (addr, TYPE, PN, A0, A1, A2, A3, A4, A5, A6, A7, D1, updated)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                           ''', (addr, model.TYPE, model.PN, model.A0, model.A1, model.A2, model.A3,
+                                 model.A4, model.A5, model.A6, model.A7, model.D1, model.updated))
 
             conn.commit()
             success = True
@@ -220,7 +223,7 @@ class ZXDataDB:
         conn.close()
         return result
 
-    def search(self, **kwargs) -> ZXDataModel:
+    def search(self, **kwargs) -> ZXDataModel | list[dict] | None:
         """根据条件搜索记录，返回包含addr和模型的字典列表"""
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -256,6 +259,8 @@ class ZXDataDB:
             model = ZXDataModel(**values)
             conn.close()
             return model
+        conn.close()
+        return None
 
 
-zx_db = ZXDataDB("data.db")
+zx_db = ZXDataDB(db_path)

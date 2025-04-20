@@ -1,12 +1,11 @@
 # api/endpoints.py
 
-from fastapi import APIRouter, Request
+import requests
+from fastapi import APIRouter, Request, HTTPException
+
 from config import uid
 from core.zxcloud import create_client
-import requests
 from . import available_device
-from .ext import random_controller_data, get_monitor_data, generate_command, global_ws_client
-from .model import OK, CommandModel
 from .ext import random_controller_data, get_monitor_data, generate_command, timed_control
 from .model import OK, CommandModel, TimedCMDModel
 
@@ -15,14 +14,20 @@ router = APIRouter()
 
 @router.get('/status/monitor')
 def get_monitor(request: Request):
-    return OK(data=get_monitor_data())
+    try:
+        return OK(data=get_monitor_data())
+    except Exception as e:
+        return HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/status/controller")
 def get_controller(request: Request):
-    return OK(
-        data=random_controller_data()
-    )
+    try:
+        return OK(
+            data=random_controller_data()
+        )
+    except Exception as e:
+        return HTTPException(status_code=500, detail=str(e))
 
 
 # {"method":"control","addr":"00:12:4B:00:1F:5F:84:8C","data":"{OD=1,D1=?}"}

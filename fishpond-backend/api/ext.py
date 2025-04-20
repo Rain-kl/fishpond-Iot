@@ -27,11 +27,14 @@ class GlobalWSClient:
 global_ws_client = GlobalWSClient()
 
 
-def get_monitor_data():
+def get_monitor_data() -> list[MonitorModel]:
     monitor_list = []
     for monitor in available_device.monitors:
         monitor_data = zx_db.search(addr=monitor["addr"])
-        value = monitor_data.model_dump()[monitor["position"]]
+        try:
+            value = monitor_data.model_dump()[monitor["position"]]
+        except Exception as e:
+            raise ValueError(f"智云数据未同步: {str(e)}")
         status = "offline"
         if int(time.time()) - int(monitor_data.updated) < 20:
             status = "online"
