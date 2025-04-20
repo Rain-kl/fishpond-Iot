@@ -1,80 +1,41 @@
-# 构建阶段 - AI 服务
-FROM python:3.12-slim AS ai-builder
-WORKDIR /app/ai
+# AI服务构建与运行
+FROM python:3.12-slim AS builder
+WORKDIR /app
 
-# 完全替换 apt 源为清华镜像源
-RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
-    sed -i 's/security.debian.org/mirrors.tuna.tsinghua.edu.cn\/debian-security/g' /etc/apt/sources.list && \
+# 配置源
+RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple && \
+    rm -f /etc/apt/sources.list.d/debian.sources /etc/apt/sources.list && \
     echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm main contrib non-free non-free-firmware" > /etc/apt/sources.list && \
     echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
     echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm-backports main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
     echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian-security bookworm-security main contrib non-free non-free-firmware" >> /etc/apt/sources.list
 
-# 配置 apt 以避免网络问题
-RUN echo "Acquire::http::Pipeline-Depth \"0\";" > /etc/apt/apt.conf.d/99nopipelining && \
-    echo "Acquire::http::Timeout \"120\";" >> /etc/apt/apt.conf.d/99timeout && \
-    echo "Acquire::https::Timeout \"120\";" >> /etc/apt/apt.conf.d/99timeout && \
-    echo "Acquire::ftp::Timeout \"120\";" >> /etc/apt/apt.conf.d/99timeout
-
-# 更换 pypi 源为清华镜像源
-RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-
-# 安装构建依赖
+# 安装构建依赖并构建wheel包
 RUN apt-get update && apt-get install -y \
     build-essential \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-COPY fishpond-ai/pyproject.toml ./
+# 复制项目文件并构建
+COPY fishpond-ai/pyproject.toml /app/
 RUN pip install --no-cache-dir build && python -m build
 
-# 依赖安装阶段 - 安装所有Python依赖
-FROM python:3.12-slim AS dependencies
-WORKDIR /app
-
-# 完全替换 apt 源为清华镜像源
-RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
-    sed -i 's/security.debian.org/mirrors.tuna.tsinghua.edu.cn\/debian-security/g' /etc/apt/sources.list && \
-    echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm main contrib non-free non-free-firmware" > /etc/apt/sources.list && \
-    echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
-    echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm-backports main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
-    echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian-security bookworm-security main contrib non-free non-free-firmware" >> /etc/apt/sources.list
-
-# 配置 apt 以避免网络问题
-RUN echo "Acquire::http::Pipeline-Depth \"0\";" > /etc/apt/apt.conf.d/99nopipelining && \
-    echo "Acquire::http::Timeout \"120\";" >> /etc/apt/apt.conf.d/99timeout && \
-    echo "Acquire::https::Timeout \"120\";" >> /etc/apt/apt.conf.d/99timeout && \
-    echo "Acquire::ftp::Timeout \"120\";" >> /etc/apt/apt.conf.d/99timeout
-
-# 更换 pypi源为清华镜像源
-RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-
 # 安装Python依赖
-COPY --from=ai-builder /app/ai/dist/*.whl /tmp/
-RUN pip install --no-cache-dir /tmp/*.whl && \
+RUN pip install --no-cache-dir /app/dist/*.whl && \
     pip install --no-cache-dir opencv-python-headless && \
-    rm -rf /tmp/*.whl ~/.cache/pip
+    rm -rf /app/dist/*.whl ~/.cache/pip
 
-# 最终阶段 - 只包含运行时需要的文件
+# 最终运行阶段
 FROM python:3.12-slim
 WORKDIR /app
 
-# 完全替换 apt 源为清华镜像源
-RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
-    sed -i 's/security.debian.org/mirrors.tuna.tsinghua.edu.cn\/debian-security/g' /etc/apt/sources.list && \
+# 配置源
+RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple && \
+    rm -f /etc/apt/sources.list.d/debian.sources /etc/apt/sources.list && \
     echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm main contrib non-free non-free-firmware" > /etc/apt/sources.list && \
     echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
     echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm-backports main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
     echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian-security bookworm-security main contrib non-free non-free-firmware" >> /etc/apt/sources.list
-
-# 配置 apt 以避免网络问题
-RUN echo "Acquire::http::Pipeline-Depth \"0\";" > /etc/apt/apt.conf.d/99nopipelining && \
-    echo "Acquire::http::Timeout \"120\";" >> /etc/apt/apt.conf.d/99timeout && \
-    echo "Acquire::https::Timeout \"120\";" >> /etc/apt/apt.conf.d/99timeout && \
-    echo "Acquire::ftp::Timeout \"120\";" >> /etc/apt/apt.conf.d/99timeout
-
-# 更换 pypi源为清华镜像源
-RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 
 # 安装运行时依赖
 RUN apt-get update && apt-get install -y \
@@ -84,11 +45,9 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# 复制Python依赖
-COPY --from=dependencies /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=dependencies /usr/local/bin /usr/local/bin
-
-# 复制AI服务代码
+# 从构建阶段复制依赖和应用
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 COPY fishpond-ai/ /app/ai/
 
 # 暴露端口
