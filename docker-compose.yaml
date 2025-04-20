@@ -7,10 +7,12 @@ services:
       dockerfile: Dockerfile
     container_name: fishpond-app
     ports:
-      - "8086:80"   # 前端 Nginx
+      - "8086:443"   # 前端 HTTPS 映射
+      - "8085:80"    # 前端 HTTP (会被重定向)
       - "10086:10086"  # 后端 API
     volumes:
       - ./fishpond-backend/data.db:/app/backend/data.db  # 持久化数据库文件
+      - ./certs:/etc/nginx/certs  # 挂载SSL证书目录
     environment:
       - AI_SERVICE_URL=http://fishpond-ai:10099  # AI 服务的地址
     restart: unless-stopped

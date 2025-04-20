@@ -31,8 +31,9 @@ WORKDIR /app
 RUN sed -i 's#https\?://dl-cdn.alpinelinux.org/alpine#https://mirrors.tuna.tsinghua.edu.cn/alpine#g' /etc/apk/repositories
 RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 # 安装nginx和运行时依赖
-RUN apk add --no-cache nginx supervisor bash && \
-    mkdir -p /run/nginx
+RUN apk add --no-cache nginx supervisor bash openssl ca-certificates && \
+    mkdir -p /run/nginx && \
+    mkdir -p /etc/nginx/certs
 
 # 复制后端构建结果并安装
 COPY --from=backend-builder /app/backend/dist/*.whl /tmp/
@@ -53,7 +54,7 @@ RUN mkdir -p /etc/supervisor.d/
 COPY supervisord.conf /etc/supervisor.d/supervisord.ini
 
 # 暴露端口
-EXPOSE 80 10086
+EXPOSE 80 443 10086
 
 # 启动命令
 CMD ["supervisord", "-c", "/etc/supervisor.d/supervisord.ini"]

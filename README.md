@@ -54,3 +54,22 @@ cd fishpond-backend
 uv sync
 uv run run_server.py
 ```
+
+## SSL安全访问
+
+本项目已配置HTTPS安全访问支持：
+
+1. 首先生成自签证书：
+```bash
+./setup-ssl.sh
+```
+
+2. 然后启动服务：
+```bash
+docker-compose up -d
+```
+
+- HTTPS访问端口：8086
+- HTTP访问端口：8085
+
+详细配置说明请参考 [deploy-with-ssl.md](deploy-with-ssl.md)
