@@ -1,0 +1,14 @@
+[project]
+name = "fishpond-ai"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.12",
+    "mediapipe>=0.10.21",
+    "numpy>=1.26.4",
+    "opencv-python>=4.11.0.86",
+    "python-multipart>=0.0.20",
+    "uvicorn[standard]>=0.34.2",
+]
