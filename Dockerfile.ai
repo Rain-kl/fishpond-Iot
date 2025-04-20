@@ -1,31 +1,49 @@
 # 构建阶段 - AI 服务
-FROM python:3.12 AS ai-builder
+FROM python:3.12-slim AS ai-builder
 WORKDIR /app/ai
 
 # 更换 pypi 源为清华镜像源
 RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 
 # 安装构建依赖
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY fishpond-ai/pyproject.toml ./
 RUN pip install --no-cache-dir build && python -m build
 
-# 最终阶段
-FROM python:3.12
+# 依赖安装阶段 - 安装所有Python依赖
+FROM python:3.12-slim AS dependencies
 WORKDIR /app
 
 # 更换 pypi源为清华镜像源
 RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 
-# 安装 OpenCV 依赖
+# 安装Python依赖
+COPY --from=ai-builder /app/ai/dist/*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/*.whl && \
+    pip install --no-cache-dir opencv-python-headless && \
+    rm -rf /tmp/*.whl ~/.cache/pip
+
+# 最终阶段 - 只包含运行时需要的文件
+FROM python:3.12-slim
+WORKDIR /app
+
+# 更换 pypi源为清华镜像源
+RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+
+# 安装运行时依赖
 RUN apt-get update && apt-get install -y \
+    ffmpeg \
     libgl1-mesa-glx \
     libglib2.0-0 \
-    ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# 复制AI服务构建结果并安装
-COPY --from=ai-builder /app/ai/dist/*.whl /tmp/
-RUN pip install --no-cache-dir /tmp/*.whl && rm /tmp/*.whl
+# 复制Python依赖
+COPY --from=dependencies /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=dependencies /usr/local/bin /usr/local/bin
 
 # 复制AI服务代码
 COPY fishpond-ai/ /app/ai/

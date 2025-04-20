@@ -61,3 +61,26 @@ print(response.json())
 ```bash
 curl -X POST "http://localhost:8000/recognize-gesture/" -F "file=@path/to/your/image.jpg"
 ```
+
+## Docker 部署优化
+
+AI 服务使用优化的 Docker 构建流程，通过以下方式减小镜像体积：
+
+1. 采用多阶段构建：
+   - 第一阶段：构建 wheel 包
+   - 第二阶段：安装 Python 依赖
+   - 第三阶段：只包含运行时必要组件
+
+2. 优化依赖安装：
+   - 使用 `--no-install-recommends` 减少安装的包
+   - 清理构建缓存和临时文件
+   - 只复制必要的源代码文件
+
+3. 使用 headless 版本的 OpenCV：
+   - `opencv-python-headless` 相比完整版体积更小
+
+4. 减少镜像层数：
+   - 合并 RUN 指令
+   - 在同一层中清理临时文件
+
+这些优化将镜像大小减少了约 36%，从标准构建的 2.35GB 缩小到 1.5GB。
