@@ -70,4 +70,25 @@ export const historyApi = {
       }
     });
   }
+};
+
+/**
+ * 手势识别相关API
+ */
+export const gestureApi = {
+  // 发送图像进行手势识别
+  recognizeGesture(imageData) {
+    // 直接使用axios而不是api实例，因为baseURL是/api
+    return axios.post('/ai/process-camera-gesture/', {
+      image: imageData
+    }, {
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(response => {
+      // 确保返回response.data
+      return response.data;
+    });
+  }
 }; 

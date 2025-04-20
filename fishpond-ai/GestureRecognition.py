@@ -383,7 +383,7 @@ class GestureRecognizer:
             print("处理完成。按任意键关闭显示窗口...")
             cv2.waitKey(0)  # 等待无限长时间，直到用户按下任意键
             cv2.destroyAllWindows()  # 关闭所有 OpenCV 窗口
-        
+
         return recognition_result
 
     def run(self):
