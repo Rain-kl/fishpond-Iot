@@ -125,32 +125,42 @@ onMounted(() => {
 
 <template>
   <div class="container">
-    <div class="gesture-card">
-      <div class="card-header">
-        <h1>手势识别</h1>
-        <div class="status-indicator" v-if="video && video.srcObject">
-          <div class="status-dot online"></div>
-          <span class="status-text">摄像头已连接</span>
-        </div>
-      </div>
-
-      <div class="card-body">
-        <div class="video-container">
-          <video id="video" autoplay playsinline></video>
-          <canvas id="canvas"></canvas>
-          <div class="loading-overlay" v-if="isRecognizing">
-            <div class="spinner"></div>
+    <div class="card-container">
+      <!-- 左侧卡片 - 摄像头区域 -->
+      <div class="gesture-card camera-card">
+        <div class="card-header">
+          <h2>摄像头</h2>
+          <div class="status-indicator" v-if="video && video.srcObject">
+            <div class="status-dot online"></div>
+            <span class="status-text">已连接</span>
           </div>
         </div>
 
-        <div class="controls-section">
+        <div class="card-body">
+          <div class="video-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+            <div class="loading-overlay" v-if="isRecognizing">
+              <div class="spinner"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧卡片 - 控制和结果区域 -->
+      <div class="gesture-card control-card">
+        <div class="card-header">
+          <h2>手势识别</h2>
+        </div>
+
+        <div class="card-body">
           <div class="result-display" v-if="recognitionResult">
             <div class="result-label">识别结果</div>
             <div class="result-value">{{ recognitionResult }}</div>
           </div>
-
+          
           <div class="status-message" id="status">{{ statusMessage }}</div>
-
+          
           <div class="controls-group">
             <button id="start-btn" @click="startCamera" class="primary-btn">
               <i class="icon-camera"></i>
@@ -178,9 +188,15 @@ onMounted(() => {
 <style scoped>
 .container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 24px auto;
   padding: 0 20px;
+}
+
+.card-container {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
 }
 
 .gesture-card {
@@ -189,6 +205,18 @@ onMounted(() => {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  flex: 1;
+  min-width: 300px;
+}
+
+.camera-card {
+  flex: 1.2;
+}
+
+.control-card {
+  flex: 0.8;
+  display: flex;
+  flex-direction: column;
 }
 
 .gesture-card:hover {
@@ -205,8 +233,8 @@ onMounted(() => {
   align-items: center;
 }
 
-.card-header h1 {
-  font-size: 20px;
+.card-header h2 {
+  font-size: 18px;
   font-weight: 600;
   color: #101828;
   margin: 0;
@@ -242,6 +270,11 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  height: calc(100% - 70px); /* 70px is approximate header height */
+}
+
+.control-card .card-body {
+  justify-content: center;
 }
 
 .video-container {
@@ -292,16 +325,10 @@ onMounted(() => {
   }
 }
 
-.controls-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
 .result-display {
   background-color: #F9F9FF;
   border-radius: 12px;
-  padding: 16px 20px;
+  padding: 20px;
   text-align: center;
   border: 1px solid #EAECF0;
 }
@@ -313,7 +340,7 @@ onMounted(() => {
 }
 
 .result-value {
-  font-size: 24px;
+  font-size: 32px;
   font-weight: 600;
   color: #5E6AD2;
 }
@@ -323,6 +350,7 @@ onMounted(() => {
   color: #667085;
   text-align: center;
   min-height: 20px;
+  padding: 8px 0;
 }
 
 .controls-group {
@@ -330,13 +358,12 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 12px;
   justify-content: center;
-  margin-top: 8px;
 }
 
 button {
   font-family: inherit;
   font-size: 15px;
-  padding: 10px 18px;
+  padding: 12px 20px;
   border-radius: 10px;
   cursor: pointer;
   display: flex;
@@ -345,6 +372,9 @@ button {
   font-weight: 500;
   transition: all 0.2s ease;
   border: none;
+  flex: 1;
+  justify-content: center;
+  min-width: 140px;
 }
 
 .primary-btn {
@@ -409,35 +439,54 @@ button:disabled {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F04438'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/%3E%3C/svg%3E");
 }
 
-@media (max-width: 640px) {
-  .container {
-    padding: 0 10px;
-    margin: 12px auto;
-  }
-
-  .card-header {
-    padding: 16px;
+/* 响应式样式 */
+@media (max-width: 900px) {
+  .card-container {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
   }
-
-  .status-indicator {
-    align-self: flex-start;
+  
+  .gesture-card {
+    flex: none;
+    width: 100%;
   }
-
+  
+  .camera-card, .control-card {
+    flex: none;
+  }
+  
   .card-body {
     padding: 16px;
   }
+  
+  .result-value {
+    font-size: 24px;
+  }
+  
+  button {
+    padding: 10px 16px;
+  }
+}
 
+@media (max-width: 500px) {
+  .container {
+    padding: 0 12px;
+    margin: 12px auto;
+  }
+  
+  .card-header {
+    padding: 16px;
+  }
+  
   .controls-group {
     flex-direction: column;
-    width: 100%;
   }
-
+  
   button {
     width: 100%;
-    justify-content: center;
+  }
+  
+  .result-value {
+    font-size: 20px;
   }
 }
 </style>
