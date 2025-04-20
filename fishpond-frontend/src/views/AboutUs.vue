@@ -3,8 +3,10 @@
     <div class="about-section">
       <h2 class="section-title">智能养鱼解决方案</h2>
       <div class="about-content">
-        <p>我们致力于将先进的物联网技术应用于水产养殖领域，打造智能化、数字化的现代养殖模式。通过实时监控水质参数、自动化控制设备以及数据分析，我们的系统能够有效提高养殖效率、降低风险、增加产量。</p>
-        <p>我们的系统实现了全天候的水质监测，包括温度、pH值、溶解氧、氨氮等关键参数，并根据鱼类生长需求，自动调节水环境，保障鱼类健康成长。</p>
+        <p>
+          我们致力于将先进的物联网技术应用于水产养殖领域，打造智能化、数字化的现代养殖模式。通过实时监控水质参数、自动化控制设备以及数据分析，我们的系统能够有效提高养殖效率、降低风险、增加产量。</p>
+        <p>
+          我们的系统实现了全天候的水质监测，包括温度、pH值、溶解氧、氨氮等关键参数，并根据鱼类生长需求，自动调节水环境，保障鱼类健康成长。</p>
       </div>
     </div>
 
@@ -12,22 +14,30 @@
       <h2 class="section-title">核心优势</h2>
       <div class="advantage-cards">
         <div class="advantage-card">
-          <el-icon class="advantage-icon"><Monitor /></el-icon>
+          <el-icon class="advantage-icon">
+            <Monitor/>
+          </el-icon>
           <h3>实时监控</h3>
           <p>全天候监测水质参数，及时预警异常情况</p>
         </div>
         <div class="advantage-card">
-          <el-icon class="advantage-icon"><SetUp /></el-icon>
+          <el-icon class="advantage-icon">
+            <SetUp/>
+          </el-icon>
           <h3>智能控制</h3>
           <p>自动化调节系统，维持最佳养殖环境</p>
         </div>
         <div class="advantage-card">
-          <el-icon class="advantage-icon"><DataAnalysis /></el-icon>
+          <el-icon class="advantage-icon">
+            <DataAnalysis/>
+          </el-icon>
           <h3>数据分析</h3>
           <p>深度分析养殖数据，优化养殖策略</p>
         </div>
         <div class="advantage-card">
-          <el-icon class="advantage-icon"><Connection /></el-icon>
+          <el-icon class="advantage-icon">
+            <Connection/>
+          </el-icon>
           <h3>远程管理</h3>
           <p>随时随地监控和管理养殖环境</p>
         </div>
@@ -90,11 +100,29 @@
         </div>
       </div>
     </div>
+    <div class="about-section">
+      <h2 class="section-title">感谢</h2>
+      <div class="about-content">
+        <div class="content-layout">
+          <div class="image-gallery">
+            <div class="gallery-item">
+              <img src="/CoachLiu.png" alt="Coach Liu">
+            </div>
+            <div class="gallery-item">
+              <img src="/CoachLiu.png" alt="Coach Liu">
+            </div>
+            <div class="gallery-item">
+              <img src="/CoachLiu.png" alt="Coach Liu">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { Monitor, SetUp, DataAnalysis, Connection } from '@element-plus/icons-vue'
+import {Monitor, SetUp, DataAnalysis, Connection} from '@element-plus/icons-vue'
 </script>
 
 <style scoped>
@@ -229,9 +257,72 @@ import { Monitor, SetUp, DataAnalysis, Connection } from '@element-plus/icons-vu
   font-size: 14px;
 }
 
+.content-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  align-items: center;
+}
+
+.content-left {
+  flex: 0 0 300px;
+}
+
+.content-left img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.content-right {
+  flex: 1;
+}
+
+.image-gallery {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.gallery-item {
+  flex: 1;
+  max-width: calc(33.33% - 14px);
+}
+
+.gallery-item img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.gallery-item img:hover {
+  transform: scale(1.03);
+}
+
 @media (max-width: 768px) {
   .advantage-cards, .member-list {
     grid-template-columns: 1fr;
+  }
+
+  .content-layout {
+    flex-direction: column;
+  }
+
+  .content-left {
+    flex: 0 0 auto;
+    margin-bottom: 20px;
+  }
+
+  .image-gallery {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .gallery-item {
+    max-width: 100%;
   }
 }
 </style> 
