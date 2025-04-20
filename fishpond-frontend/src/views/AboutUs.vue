@@ -100,24 +100,24 @@
         </div>
       </div>
     </div>
-    <div class="about-section">
-      <h2 class="section-title">感谢</h2>
-      <div class="about-content">
-        <div class="content-layout">
-          <div class="image-gallery">
-            <div class="gallery-item">
-              <img src="/CoachLiu.png" alt="Coach Liu">
-            </div>
-            <div class="gallery-item">
-              <img src="/CoachLiu.png" alt="Coach Liu">
-            </div>
-            <div class="gallery-item">
-              <img src="/CoachLiu.png" alt="Coach Liu">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<!--    <div class="about-section">-->
+<!--      <h2 class="section-title">感谢</h2>-->
+<!--      <div class="about-content">-->
+<!--        <div class="content-layout">-->
+<!--          <div class="image-gallery">-->
+<!--            <div class="gallery-item">-->
+<!--              <img src="/CoachLiu.png" alt="Coach Liu">-->
+<!--            </div>-->
+<!--            <div class="gallery-item">-->
+<!--              <img src="/CoachLiu.png" alt="Coach Liu">-->
+<!--            </div>-->
+<!--            <div class="gallery-item">-->
+<!--              <img src="/CoachLiu.png" alt="Coach Liu">-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
   </div>
 </template>
 
