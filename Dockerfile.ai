@@ -1,0 +1,37 @@
+# 构建阶段 - AI 服务
+FROM python:3.12 AS ai-builder
+WORKDIR /app/ai
+
+# 更换 pypi 源为清华镜像源
+RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+
+# 安装构建依赖
+COPY fishpond-ai/pyproject.toml ./
+RUN pip install --no-cache-dir build && python -m build
+
+# 最终阶段
+FROM python:3.12
+WORKDIR /app
+
+# 更换 pypi源为清华镜像源
+RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+
+# 安装 OpenCV 依赖
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+# 复制AI服务构建结果并安装
+COPY --from=ai-builder /app/ai/dist/*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/*.whl && rm /tmp/*.whl
+
+# 复制AI服务代码
+COPY fishpond-ai/ /app/ai/
+
+# 暴露端口
+EXPOSE 10099
+
+# 启动命令
+CMD ["python", "/app/ai/run_server.py"] 
