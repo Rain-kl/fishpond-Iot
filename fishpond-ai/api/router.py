@@ -51,19 +51,19 @@ async def process_camera_gesture(data: dict = Body(...)):
         image_data = data.get("image")
         if not image_data:
             raise HTTPException(status_code=400, detail="未提供图像数据")
-        
+
         # 移除Base64前缀（如果有）
         if "base64," in image_data:
             image_data = image_data.split("base64,")[1]
-        
+
         # 创建临时目录和文件
         temp_dir = tempfile.mkdtemp()
         temp_file_path = os.path.join(temp_dir, "camera_capture.jpg")
-        
+
         # 解码Base64数据并保存为图像文件
         with open(temp_file_path, "wb") as temp_file:
             temp_file.write(base64.b64decode(image_data))
-        
+
         # 初始化手势识别器并处理图像
         try:
             recognizer = GestureRecognizer()
@@ -72,13 +72,12 @@ async def process_camera_gesture(data: dict = Body(...)):
         except Exception as e:
             print(f"处理图像时出错: {str(e)}")
             return JSONResponse(content={"gesture": "错误", "error": str(e)})
-    
+
     except Exception as e:
         print(f"处理失败: {str(e)}")
         return JSONResponse(content={"gesture": "错误", "error": str(e)})
-    
+
     finally:
         # 清理临时文件
         if "temp_dir" in locals():
             shutil.rmtree(temp_dir)
-

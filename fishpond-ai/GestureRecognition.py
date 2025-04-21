@@ -1,5 +1,3 @@
-import os
-
 import cv2
 import mediapipe as mp
 import time
@@ -13,25 +11,53 @@ class GestureRecognizer:
         # 可调整的严格度
         self.STRICTNESS_LEVEL = 2  # 1=宽松, 2=中等, 3=严格, 4=非常严格
         self.strictness_presets = {
-            1: {"stability_frames": 3, "min_stability_score": 0.7, "palm_facing_threshold": 0.1, "extension_ratio": 0.65, "confidence_threshold": 0.5},
-            2: {"stability_frames": 5, "min_stability_score": 0.75, "palm_facing_threshold": 0.2, "extension_ratio": 0.75, "confidence_threshold": 0.6},
-            3: {"stability_frames": 7, "min_stability_score": 0.8, "palm_facing_threshold": 0.3, "extension_ratio": 0.85, "confidence_threshold": 0.7},
-            4: {"stability_frames": 10, "min_stability_score": 0.85, "palm_facing_threshold": 0.4, "extension_ratio": 0.95, "confidence_threshold": 0.8}
+            1: {
+                "stability_frames": 3,
+                "min_stability_score": 0.7,
+                "palm_facing_threshold": 0.1,
+                "extension_ratio": 0.65,
+                "confidence_threshold": 0.5,
+            },
+            2: {
+                "stability_frames": 5,
+                "min_stability_score": 0.75,
+                "palm_facing_threshold": 0.2,
+                "extension_ratio": 0.75,
+                "confidence_threshold": 0.6,
+            },
+            3: {
+                "stability_frames": 7,
+                "min_stability_score": 0.8,
+                "palm_facing_threshold": 0.3,
+                "extension_ratio": 0.85,
+                "confidence_threshold": 0.7,
+            },
+            4: {
+                "stability_frames": 10,
+                "min_stability_score": 0.85,
+                "palm_facing_threshold": 0.4,
+                "extension_ratio": 0.95,
+                "confidence_threshold": 0.8,
+            },
         }
 
         # --- Initialization ---
         self.mp_hands = mp.solutions.hands
-        self.hands = self.mp_hands.Hands(static_image_mode=False,
-                                         max_num_hands=1,
-                                         min_detection_confidence=0.5,
-                                         min_tracking_confidence=0.5)
-        self.hands_static = self.mp_hands.Hands(static_image_mode=True,
-                                                max_num_hands=1,
-                                                min_detection_confidence=0.5,
-                                                min_tracking_confidence=0.5)
+        self.hands = self.mp_hands.Hands(
+            static_image_mode=False,
+            max_num_hands=1,
+            min_detection_confidence=0.5,
+            min_tracking_confidence=0.5,
+        )
+        self.hands_static = self.mp_hands.Hands(
+            static_image_mode=True,
+            max_num_hands=1,
+            min_detection_confidence=0.5,
+            min_tracking_confidence=0.5,
+        )
 
         self.mp_drawing = mp.solutions.drawing_utils
-        
+
         # 不在初始化时打开摄像头，而是在需要时才打开
         self.cap = None
 
@@ -96,7 +122,7 @@ class GestureRecognizer:
                 total_diff += diff
 
             avg_diff = total_diff / len(current_pos)
-            stability_score *= (1 - min(avg_diff * 10, 0.5))  # 差异越小，稳定性越高
+            stability_score *= 1 - min(avg_diff * 10, 0.5)  # 差异越小，稳定性越高
 
         # 更新历史记录（保持固定长度）
         prev_positions.pop(0)
@@ -145,20 +171,25 @@ class GestureRecognizer:
 
             # 宽松模式下的拇指检测
             if self.STRICTNESS_LEVEL == 1:
-                if (handedness == "Right" and thumb_tip < thumb_mcp) or \
-                        (handedness == "Left" and thumb_tip > thumb_mcp):
+                if (handedness == "Right" and thumb_tip < thumb_mcp) or (
+                    handedness == "Left" and thumb_tip > thumb_mcp
+                ):
                     thumb_is_open = True
             else:
                 # 严格模式下的拇指检测
-                if (handedness == "Right" and thumb_tip < thumb_ip < thumb_mcp) or \
-                        (handedness == "Left" and thumb_tip > thumb_ip > thumb_mcp):
+                if (handedness == "Right" and thumb_tip < thumb_ip < thumb_mcp) or (
+                    handedness == "Left" and thumb_tip > thumb_ip > thumb_mcp
+                ):
                     # 额外检查：拇指应该与其他手指有一定角度
                     index_mcp = lm_list[5][1:3]
                     thumb_cmc = lm_list[1][1:3]
                     thumb_tip_pos = lm_list[4][1:3]
 
                     # 计算向量和角度
-                    v1 = [thumb_tip_pos[0] - thumb_cmc[0], thumb_tip_pos[1] - thumb_cmc[1]]
+                    v1 = [
+                        thumb_tip_pos[0] - thumb_cmc[0],
+                        thumb_tip_pos[1] - thumb_cmc[1],
+                    ]
                     v2 = [index_mcp[0] - thumb_cmc[0], index_mcp[1] - thumb_cmc[1]]
 
                     # 检查向量长度避免除零错误
@@ -170,7 +201,9 @@ class GestureRecognizer:
                         angle = math.acos(min(max(cosine, -1.0), 1.0)) * 180 / math.pi
 
                         # 角度要求随严格度增加
-                        min_angle = 20 + (self.STRICTNESS_LEVEL - 2) * 5  # 20°, 25°, 30°
+                        min_angle = (
+                            20 + (self.STRICTNESS_LEVEL - 2) * 5
+                        )  # 20°, 25°, 30°
                         if angle > min_angle:
                             thumb_is_open = True
 
@@ -180,7 +213,10 @@ class GestureRecognizer:
         for finger_id in range(1, 5):  # 食指、中指、无名指、小指
             if self.STRICTNESS_LEVEL <= 2:
                 # 宽松/中等模式：简单检查指尖位置
-                if lm_list[self.tip_ids[finger_id]][2] < lm_list[self.tip_ids[finger_id] - 2][2]:
+                if (
+                    lm_list[self.tip_ids[finger_id]][2]
+                    < lm_list[self.tip_ids[finger_id] - 2][2]
+                ):
                     fingers.append(1)
                 else:
                     fingers.append(0)
@@ -232,15 +268,21 @@ class GestureRecognizer:
             is_stable = True
             if enable_stabilizer:
                 if self.STRICTNESS_LEVEL >= 2:
-                    is_stable, self.last_positions = self.check_hand_stability(my_hand.landmark, self.last_positions)
+                    is_stable, self.last_positions = self.check_hand_stability(
+                        my_hand.landmark, self.last_positions
+                    )
             else:
                 # 不启用稳定器时清空历史记录但保持稳定状态为True
                 self.last_positions = []
                 self.stable_count = 0
 
-            if hand_confidence >= config["confidence_threshold"] and (palm_facing or self.STRICTNESS_LEVEL == 1):
+            if hand_confidence >= config["confidence_threshold"] and (
+                palm_facing or self.STRICTNESS_LEVEL == 1
+            ):
                 hand_found = True
-                self.mp_drawing.draw_landmarks(img, my_hand, self.mp_hands.HAND_CONNECTIONS)
+                self.mp_drawing.draw_landmarks(
+                    img, my_hand, self.mp_hands.HAND_CONNECTIONS
+                )
 
                 # 提取关键点坐标
                 for id, lm in enumerate(my_hand.landmark):
@@ -256,14 +298,20 @@ class GestureRecognizer:
 
                     # 根据严格度和稳定器状态确定是否需要稳定性检查
                     if not enable_stabilizer or self.STRICTNESS_LEVEL <= 2 or is_stable:
-                        if enable_stabilizer and self.stable_count < min(2, self.STRICTNESS_LEVEL):  # 仅在启用稳定器时检查
+                        if enable_stabilizer and self.stable_count < min(
+                            2, self.STRICTNESS_LEVEL
+                        ):  # 仅在启用稳定器时检查
                             self.stable_count += 1
-                            display_text = self.last_gesture if self.last_gesture else "null"
+                            display_text = (
+                                self.last_gesture if self.last_gesture else "null"
+                            )
                         else:
                             display_text = str(total_fingers)
                             self.last_gesture = display_text
                     else:
-                        display_text = self.last_gesture if self.last_gesture else "null"
+                        display_text = (
+                            self.last_gesture if self.last_gesture else "null"
+                        )
                 else:
                     display_text = "null"
             else:
@@ -275,46 +323,77 @@ class GestureRecognizer:
             self.last_gesture = None
 
         # 绘制手势显示
-        self.draw_results(img, display_text, results, hand_confidence, palm_facing, is_stable, w, h)
+        self.draw_results(
+            img, display_text, results, hand_confidence, palm_facing, is_stable, w, h
+        )
 
         # FPS计算
         cTime = time.time()
         fps = 1 / (cTime - self.pTime) if (cTime - self.pTime) > 0 else 0
         self.pTime = cTime
-        cv2.putText(img, f'FPS: {int(fps)}', (w - 150, 50), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+        cv2.putText(
+            img,
+            f"FPS: {int(fps)}",
+            (w - 150, 50),
+            cv2.FONT_HERSHEY_PLAIN,
+            2,
+            (255, 0, 0),
+            2,
+        )
 
         return img, display_text
 
-    def draw_results(self, img, display_text, results, hand_confidence, palm_facing, is_stable, w, h):
+    def draw_results(
+        self, img, display_text, results, hand_confidence, palm_facing, is_stable, w, h
+    ):
         """绘制识别结果和状态信息"""
         # 绘制手势数字
         cv2.rectangle(img, (20, 20), (200, 120), (0, 255, 0), cv2.FILLED)
-        cv2.putText(img, display_text, (45, 100), cv2.FONT_HERSHEY_PLAIN, 5, (255, 0, 0), 5)
+        cv2.putText(
+            img, display_text, (45, 100), cv2.FONT_HERSHEY_PLAIN, 5, (255, 0, 0), 5
+        )
 
         # 显示严格度和状态信息
-        status_text = [f'严格度: {self.STRICTNESS_LEVEL}/4']
+        status_text = [f"严格度: {self.STRICTNESS_LEVEL}/4"]
         if results and results.multi_hand_landmarks:
-            status_text.append(f'置信度: {hand_confidence:.2f}')
+            status_text.append(f"置信度: {hand_confidence:.2f}")
             status_text.append(f'手掌朝向: {"是" if palm_facing else "否"}')
             status_text.append(f'稳定性: {"是" if is_stable else "否"}')
 
             y_pos = 160
             for text in status_text:
-                cv2.putText(img, text, (20, y_pos), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 255), 2)
+                cv2.putText(
+                    img, text, (20, y_pos), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 255), 2
+                )
                 y_pos += 30
         else:
-            cv2.putText(img, status_text[0], (20, 160), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 255), 2)
+            cv2.putText(
+                img,
+                status_text[0],
+                (20, 160),
+                cv2.FONT_HERSHEY_PLAIN,
+                1.5,
+                (0, 0, 255),
+                2,
+            )
 
         # 操作指南
-        cv2.putText(img, "按 '+' 增加严格度, '-' 降低严格度", (w - 350, h - 20),
-                    cv2.FONT_HERSHEY_PLAIN, 1.2, (255, 255, 255), 1)
+        cv2.putText(
+            img,
+            "按 '+' 增加严格度, '-' 降低严格度",
+            (w - 350, h - 20),
+            cv2.FONT_HERSHEY_PLAIN,
+            1.2,
+            (255, 255, 255),
+            1,
+        )
 
     def adjust_strictness(self, key):
         """调整识别严格度"""
-        if key == ord('+') or key == ord('='):  # 增加严格度
+        if key == ord("+") or key == ord("="):  # 增加严格度
             self.STRICTNESS_LEVEL = min(self.STRICTNESS_LEVEL + 1, 4)
             print(f"严格度提高到: {self.STRICTNESS_LEVEL}/4")
-        elif key == ord('-') or key == ord('_'):  # 降低严格度
+        elif key == ord("-") or key == ord("_"):  # 降低严格度
             self.STRICTNESS_LEVEL = max(self.STRICTNESS_LEVEL - 1, 1)
             print(f"严格度降低到: {self.STRICTNESS_LEVEL}/4")
 
@@ -328,14 +407,14 @@ class GestureRecognizer:
 
             # 处理图像并识别手势
             result = self.process_frame(img, enable_stabilizer=False)
-            
+
             # process_frame可能返回2个或5个值，需要检查
             if isinstance(result, tuple) and len(result) == 5:
                 img, gesture, confidence, palm_facing, is_stable = result
             else:
                 # 旧版本只返回img和gesture
                 img, gesture = result
-                
+
             # 如果不显示，则直接返回识别结果
             if no_display:
                 return gesture
@@ -344,7 +423,7 @@ class GestureRecognizer:
             cv2.imshow("Image", img)
             cv2.waitKey(0)
             return gesture
-            
+
         except Exception as e:
             print(f"处理图像时出错: {str(e)}")
             return "错误：处理图像失败"
@@ -357,20 +436,30 @@ class GestureRecognizer:
             if not self.cap.isOpened():
                 print("错误：无法打开摄像头")
                 return False
-                
+
             while True:
                 success, img = self.cap.read()
                 if not success:
                     print("无法获取摄像头帧")
                     break
 
-                img, gesture, confidence, palm_facing, is_stable = self.process_frame(img)
+                img, gesture, confidence, palm_facing, is_stable = self.process_frame(
+                    img
+                )
 
                 cTime = time.time()
                 fps = 1 / (cTime - self.pTime)
                 self.pTime = cTime
 
-                cv2.putText(img, f'FPS: {int(fps)}', (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
+                cv2.putText(
+                    img,
+                    f"FPS: {int(fps)}",
+                    (10, 70),
+                    cv2.FONT_HERSHEY_PLAIN,
+                    3,
+                    (255, 0, 255),
+                    3,
+                )
 
                 cv2.imshow("Image", img)
                 key = cv2.waitKey(1)
@@ -381,10 +470,10 @@ class GestureRecognizer:
                 # 数字键调整严格度
                 elif 49 <= key <= 52:  # 1-4
                     self.adjust_strictness(key)
-            
+
             self.cleanup()
             return True
-            
+
         except Exception as e:
             print(f"运行时出错: {str(e)}")
             self.cleanup()
