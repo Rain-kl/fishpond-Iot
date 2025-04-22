@@ -69,13 +69,13 @@
             <div class="member-card">
               <div class="member-info">
                 <h4>胡智坤</h4>
-                <p>项目负责人，系统架构师</p>
+                <p>项目负责人，系统架构师，原神专家，资深轮椅玩家</p>
               </div>
             </div>
             <div class="member-card">
               <div class="member-info">
                 <h4>刘希文</h4>
-                <p>硬件工程师，传感器专家</p>
+                <p>cfm专家,资深突破手，81专业工程师</p>
               </div>
             </div>
             <div class="member-card">
