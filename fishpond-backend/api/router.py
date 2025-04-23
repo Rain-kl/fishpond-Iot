@@ -49,26 +49,28 @@ async def controller_command(request: Request, command: CommandModel):
         return OK(message=f"发送命令时出错: {str(e)}", data={"success": False})
 
 
-@router.post("/controller/timed")
-async def timed_controller_command(request: Request, command: TimedCMDModel):
-    try:
-        # 调用 ext.py 中的定时控制函数
-        result = await timed_control(command.device, command.duration)
-        if result["success"]:
-            return OK(message="定时控制命令已执行", data=result)
-        else:
-            return OK(message=result["message"], data={"success": False})
-    except Exception as e:
-        return OK(message=f"执行定时控制时出错: {str(e)}", data={"success": False})
-
-
 @router.get("/history")
 async def get_history(request: Request, device: int, duration):
-    for controller in available_device.monitors:
-        if controller["id"] == device:
-            addr = controller["addr"]
-            position = controller["position"]
-            url = f"http://api.zhiyun360.com:8080/v2/feeds/{uid}/datastreams/{addr}_{position}?duration={duration}"
-            rsp = requests.get(url)
-            return rsp.json()
-    pass
+    try:
+        for controller in available_device.monitors:
+            if controller["id"] == device:
+                addr = controller["addr"]
+                position = controller["position"]
+                url = f"http://api.zhiyun360.com:8080/v2/feeds/{uid}/datastreams/{addr}_{position}?duration={duration}"
+                try:
+                    rsp = requests.get(url, timeout=5)  # 添加超时设置
+                    rsp.raise_for_status()  # 检查HTTP响应状态
+                    return rsp.json()
+                except requests.exceptions.ConnectionError:
+                    raise HTTPException(status_code=503, detail="无法连接到智云平台服务器，请检查网络连接")
+                except requests.exceptions.Timeout:
+                    raise HTTPException(status_code=504, detail="连接智云平台服务器超时，请稍后再试")
+                except requests.exceptions.HTTPError as http_err:
+                    raise HTTPException(status_code=502, detail=f"智云平台服务器返回错误: {http_err}")
+                except ValueError:  # JSON解析错误
+                    raise HTTPException(status_code=500, detail="解析智云平台响应数据失败")
+        raise HTTPException(status_code=404, detail=f"未找到ID为{device}的设备")
+    except HTTPException:
+        raise  # 重新抛出HTTPException
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取历史数据时出错: {str(e)}")
