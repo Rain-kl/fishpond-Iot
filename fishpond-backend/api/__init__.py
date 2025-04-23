@@ -10,7 +10,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="KB Service API",
         description="API for monitoring and controlling the crawling service",
-        version="1.0.0"
+        version="1.0.0",
     )
 
     # Include the API router

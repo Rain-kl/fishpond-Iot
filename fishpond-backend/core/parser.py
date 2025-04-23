@@ -34,18 +34,18 @@ def parse_zx_response(zx_response_str: str):
         if "data" not in zx_response_json or "addr" not in zx_response_json:
             logger.warning(f"响应数据格式不正确: {zx_response_str}")
             return None
-            
+
         zx_data_json = parse_zx_data_json(zx_response_json["data"])
         zx_data = ZXDataModel(updated=str(int(time.time())), **zx_data_json)
-        
+
         zx_response = ZXResponseModel(
             method=zx_response_json["method"],
             addr=zx_response_json["addr"],
-            data=zx_data
+            data=zx_data,
         )
-        
+
         zx_db.update(zx_response.addr, zx_data)
-        logger.debug(f"更新设备数据: {zx_response.addr}")
+        # logger.debug(f"更新设备数据: {zx_response.addr}")
         return zx_response
     except Exception as e:
         logger.error(f"解析响应出错: {str(e)}, 原始响应: {zx_response_str}")

@@ -5,7 +5,7 @@ controllers = [
         "icon": "valve-inlet.png",
         "status": "online",
         "isOn": False,
-        "addr":"00:12:4B:00:1F:5F:84:8C",
+        "addr": "00:12:4B:00:1F:5F:84:8C",
         "position": "1",
     },
     {
@@ -43,5 +43,5 @@ controllers = [
         "isOn": False,
         "addr": "00:12:4B:00:1F:5F:84:8C",
         "position": "2",
-    }
+    },
 ]

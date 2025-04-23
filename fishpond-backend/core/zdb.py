@@ -23,7 +23,8 @@ class ZXDataDB:
         conn = self._get_connection()
         cursor = conn.cursor()
 
-        cursor.execute('''
+        cursor.execute(
+            """
                        CREATE TABLE IF NOT EXISTS zx_data
                        (
                            addr    TEXT PRIMARY KEY,
@@ -40,18 +41,19 @@ class ZXDataDB:
                            D1      TEXT,
                            updated TEXT
                        )
-                       ''')
+                       """
+        )
 
         # 检查表中是否已经有A1-A3字段，如果没有则添加
         cursor.execute("PRAGMA table_info(zx_data)")
         columns = [column[1] for column in cursor.fetchall()]
 
         # 如果是旧版本的表结构，添加新的字段
-        if 'A1' not in columns:
+        if "A1" not in columns:
             cursor.execute("ALTER TABLE zx_data ADD COLUMN A1 TEXT")
-        if 'A2' not in columns:
+        if "A2" not in columns:
             cursor.execute("ALTER TABLE zx_data ADD COLUMN A2 TEXT")
-        if 'A3' not in columns:
+        if "A3" not in columns:
             cursor.execute("ALTER TABLE zx_data ADD COLUMN A3 TEXT")
 
         conn.commit()
@@ -63,11 +65,27 @@ class ZXDataDB:
         cursor = conn.cursor()
 
         try:
-            cursor.execute('''
+            cursor.execute(
+                """
                            INSERT INTO zx_data (addr, TYPE, PN, A0, A1, A2, A3, A4, A5, A6, A7, D1, updated)
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                           ''', (addr, model.TYPE, model.PN, model.A0, model.A1, model.A2, model.A3,
-                                 model.A4, model.A5, model.A6, model.A7, model.D1, model.updated))
+                           """,
+                (
+                    addr,
+                    model.TYPE,
+                    model.PN,
+                    model.A0,
+                    model.A1,
+                    model.A2,
+                    model.A3,
+                    model.A4,
+                    model.A5,
+                    model.A6,
+                    model.A7,
+                    model.D1,
+                    model.updated,
+                ),
+            )
 
             conn.commit()
             success = True
@@ -195,8 +213,8 @@ class ZXDataDB:
         values = dict(zip(columns, record))
 
         # 移除addr字段
-        if 'addr' in values:
-            del values['addr']
+        if "addr" in values:
+            del values["addr"]
 
         return ZXDataModel(**values)
 
@@ -215,7 +233,7 @@ class ZXDataDB:
             values = dict(zip(columns, record))
 
             # 分离addr和其他属性
-            addr = values.pop('addr')
+            addr = values.pop("addr")
             model = ZXDataModel(**values)
 
             result.append({"addr": addr, "model": model})
@@ -233,7 +251,7 @@ class ZXDataDB:
         params = []
 
         for key, value in kwargs.items():
-            if key == 'addr' and value:
+            if key == "addr" and value:
                 conditions.append("addr LIKE ?")
                 params.append(f"%{value}%")
             elif hasattr(ZXDataModel, key) and value:
@@ -255,7 +273,7 @@ class ZXDataDB:
             values = dict(zip(columns, record))
 
             # 分离addr和其他属性
-            addr = values.pop('addr')
+            addr = values.pop("addr")
             model = ZXDataModel(**values)
             conn.close()
             return model

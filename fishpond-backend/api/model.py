@@ -2,7 +2,7 @@ from typing import TypeVar, Generic
 
 from pydantic import BaseModel
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class OK(BaseModel, Generic[T]):
@@ -22,6 +22,7 @@ class OK(BaseModel, Generic[T]):
 #     max: 10
 #   },
 
+
 class MonitorModel(BaseModel):
     id: int
     name: str
@@ -40,6 +41,7 @@ class MonitorModel(BaseModel):
 #   status: 'online',
 #   isOn: false
 # },
+
 
 class ControllerModel(BaseModel):
     id: int

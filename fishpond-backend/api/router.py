@@ -6,13 +6,18 @@ from fastapi import APIRouter, Request, HTTPException
 from config import uid
 from core.zxcloud import create_client
 from . import available_device
-from .ext import random_controller_data, get_monitor_data, generate_command, timed_control
+from .ext import (
+    random_controller_data,
+    get_monitor_data,
+    generate_command,
+    timed_control,
+)
 from .model import OK, CommandModel, TimedCMDModel
 
 router = APIRouter()
 
 
-@router.get('/status/monitor')
+@router.get("/status/monitor")
 def get_monitor(request: Request):
     try:
         return OK(data=get_monitor_data())
@@ -23,9 +28,7 @@ def get_monitor(request: Request):
 @router.get("/status/controller")
 def get_controller(request: Request):
     try:
-        return OK(
-            data=random_controller_data()
-        )
+        return OK(data=random_controller_data())
     except Exception as e:
         return HTTPException(status_code=500, detail=str(e))
 
@@ -62,9 +65,9 @@ async def timed_controller_command(request: Request, command: TimedCMDModel):
 @router.get("/history")
 async def get_history(request: Request, device: int, duration):
     for controller in available_device.monitors:
-        if controller['id'] == device:
-            addr = controller['addr']
-            position = controller['position']
+        if controller["id"] == device:
+            addr = controller["addr"]
+            position = controller["position"]
             url = f"http://api.zhiyun360.com:8080/v2/feeds/{uid}/datastreams/{addr}_{position}?duration={duration}"
             rsp = requests.get(url)
             return rsp.json()

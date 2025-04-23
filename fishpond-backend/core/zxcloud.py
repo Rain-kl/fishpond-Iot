@@ -2,25 +2,29 @@
 # wss://api.zhiyun360.com:28090/
 
 import json
-from config import uid, key
+import time
+from datetime import datetime
+
 import websockets
 from loguru import logger
+
+from config import uid, key
 
 
 class WebSocketClient:
     def __init__(self):
         self.url = "wss://api.zhiyun360.com:28090/"
         self.websocket = None
-        self.authorization = {
-            "method": "authenticate",
-            "uid": uid,
-            "key": key
-        }
+        self.authorization = {"method": "authenticate", "uid": uid, "key": key}
+        self.last_log_time = 0  # 添加时间跟踪变量，用于限制日志记录频率
 
     async def connect(self):
-        self.websocket = await websockets.connect(self.url)
-        await self.send_data(self.authorization)
-        logger.success("Connected!")
+        try:
+            self.websocket = await websockets.connect(self.url)
+            await self.send_data(self.authorization)
+            logger.success("Connected!")
+        except Exception as e:
+            raise ConnectionError(f"连接失败: {str(e)}")
 
     def is_connected(self):
         """
@@ -46,9 +50,7 @@ class WebSocketClient:
         :return:
         """
         if self.websocket:
-            await self.websocket.send(
-                json.dumps(data, ensure_ascii=False)
-            )
+            await self.websocket.send(json.dumps(data, ensure_ascii=False))
             logger.success("Process -> engine")
 
     async def receive_message(self):
@@ -59,14 +61,22 @@ class WebSocketClient:
         if self.websocket:
             try:
                 response = await self.websocket.recv()
+
+                # 限制日志记录频率，每60秒只记录一次
+                current_time = time.time()
+                if current_time - self.last_log_time >= 60:
+                    logger.info(
+                        f"接收到服务器消息 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                    )
+                    self.last_log_time = current_time
+
                 return response
             except websockets.exceptions.ConnectionClosedError as e:
                 logger.critical(f"连接已断开: {str(e)}")
-                # 不在这里自动重连，让调用者决定如何处理连接断开
-                return None
+                raise ConnectionError("WebSocket连接已断开")
         else:
             logger.error("WebSocket连接不存在")
-            return None
+            raise ConnectionError("WebSocket<UNK>")
 
     async def close(self):
         if self.websocket:

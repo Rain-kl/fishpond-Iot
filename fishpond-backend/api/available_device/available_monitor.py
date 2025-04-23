@@ -8,8 +8,8 @@ monitors = [
         "status": "online",
         "min": 0,
         "max": 40,
-        "addr":"00:12:4B:00:1E:F9:FE:29",
-        "position":"A0"
+        "addr": "00:12:4B:00:1E:F9:FE:29",
+        "position": "A0",
     },
     {
         "id": 2,
@@ -21,7 +21,7 @@ monitors = [
         "min": 0,
         "max": 100,
         "addr": "00:12:4B:00:1E:F9:FC:CA",
-        "position": "A1"
+        "position": "A1",
     },
     {
         "id": 3,
@@ -33,7 +33,7 @@ monitors = [
         "min": 0,
         "max": 14,
         "addr": "00:12:4B:00:1F:5F:82:23",
-        "position": "A0"
+        "position": "A0",
     },
     {
         "id": 4,
@@ -45,7 +45,7 @@ monitors = [
         "min": 0,
         "max": 15,
         "addr": "00:12:4B:00:07:5D:D7:D8",
-        "position": "A6"
+        "position": "A6",
     },
     {
         "id": 5,
@@ -57,7 +57,6 @@ monitors = [
         "min": 0,
         "max": 1000,
         "addr": "00:12:4B:00:15:D1:5C:83",
-        "position": "A0"
+        "position": "A0",
     },
-
 ]

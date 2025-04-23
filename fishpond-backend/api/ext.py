@@ -40,40 +40,46 @@ def get_monitor_data() -> list[MonitorModel]:
             status = "online"
 
         model = MonitorModel(
-            id=monitor['id'],
-            name=monitor['name'],
+            id=monitor["id"],
+            name=monitor["name"],
             value=value,
-            unit=monitor['unit'],
-            type=monitor['type'],
+            unit=monitor["unit"],
+            type=monitor["type"],
             status=status,
-            min=monitor['min'],
-            max=monitor['max']
+            min=monitor["min"],
+            max=monitor["max"],
         )
         monitor_list.append(model)
     return monitor_list
 
 
 def random_monitor_data():
-    return [MonitorModel(
-        id=monitor['id'],
-        name=monitor['name'],
-        value=random.uniform(monitor['min'], monitor['max']),
-        unit=monitor['unit'],
-        type=monitor['type'],
-        status=random.choice(['online', 'offline']),
-        min=monitor['min'],
-        max=monitor['max']
-    ) for monitor in available_device.monitors]
+    return [
+        MonitorModel(
+            id=monitor["id"],
+            name=monitor["name"],
+            value=random.uniform(monitor["min"], monitor["max"]),
+            unit=monitor["unit"],
+            type=monitor["type"],
+            status=random.choice(["online", "offline"]),
+            min=monitor["min"],
+            max=monitor["max"],
+        )
+        for monitor in available_device.monitors
+    ]
 
 
 def random_controller_data():
-    return [ControllerModel(
-        id=controller['id'],
-        name=controller['name'],
-        icon=controller['icon'],
-        status="online",
-        isOn=False
-    ) for controller in available_device.controllers]
+    return [
+        ControllerModel(
+            id=controller["id"],
+            name=controller["name"],
+            icon=controller["icon"],
+            status="online",
+            isOn=False,
+        )
+        for controller in available_device.controllers
+    ]
 
 
 def generate_command(command: CommandModel) -> dict[str, str | Any] | None:
@@ -85,20 +91,20 @@ def generate_command(command: CommandModel) -> dict[str, str | Any] | None:
     """
 
     for controller in available_device.controllers:
-        if controller['id'] == command.device:
-            addr = controller['addr']
+        if controller["id"] == command.device:
+            addr = controller["addr"]
             cmd_value = "1" if command.command == "1" else "0"
             if cmd_value == "1":
                 cmd_json = {
                     "method": "control",
                     "addr": addr,
-                    "data": f"{{OD1={controller['position']},D1=?}}"
+                    "data": f"{{OD1={controller['position']},D1=?}}",
                 }
             else:
                 cmd_json = {
                     "method": "control",
                     "addr": addr,
-                    "data": f"{{CD1={controller['position']},D1=?}}"
+                    "data": f"{{CD1={controller['position']},D1=?}}",
                 }
             return cmd_json
     return None
