@@ -11,7 +11,7 @@ services:
       - "8085:80"    # 前端 HTTP (会被重定向)
       - "10086:10086"  # 后端 API
     volumes:
-      - ./data:/app/backend/data/data.db  # 持久化数据库文件
+      - ./data:/app/backend/data/  # 持久化数据库文件
       - ./certs:/etc/nginx/certs  # 挂载SSL证书目录
     environment:
       - AI_SERVICE_URL=http://fishpond-ai:10099  # AI 服务的地址
