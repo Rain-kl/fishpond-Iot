@@ -31,13 +31,28 @@
 
 1. 确保已安装Docker和Docker Compose
 2. 克隆本仓库
-3. 在项目根目录运行：
 
 ```bash
-docker-compose up -d
+git clone https://github.com/Rain-kl/fishpond-Iot
 ```
 
-4. 访问 http://localhost 即可打开监控系统界面
+3. 在项目根目录运行：
+
+注意：如果需要使用手势识别等需要调用摄像头权限的功能时，必须配置 ssl，一键脚本和 ssl 证书生成需要在 linux环境下执行，Windows用户请手动生成证书存放在 ./certs 目录下，然后使用 docker-compose 启动服务。
+
+```bash
+./setup-ssl.sh  # 生成SSL证书
+docker-compose build  # 构建Docker镜像
+docker-compose up -d  # 启动服务
+```
+
+或者使用一键脚本
+
+```bash
+./deploy.sh
+```
+
+4.  访问 <https://localhost:8086> 即可打开监控系统界面
 
 ### 开发环境设置
 
@@ -58,6 +73,7 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -e .
 python run_server.py
 ```
+
 ```bash
 # using uv
 cd fishpond-backend
@@ -74,6 +90,7 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -e .
 python run_server.py
 ```
+
 ```bash
 # using uv
 cd fishpond-ai
@@ -101,14 +118,16 @@ uv run run_server.py
 
 ## SSL安全访问
 
-本项目已配置HTTPS安全访问支持：
+本项目已配置HTTPS安全访问支持
 
 1. 首先生成自签证书：
+
 ```bash
 ./setup-ssl.sh
 ```
 
 2. 然后启动服务：
+
 ```bash
 docker-compose up -d
 ```
