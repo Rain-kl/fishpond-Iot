@@ -6,7 +6,7 @@
     <div class="main-content">
       <div class="header">
         <div class="header-left">
-          <h1 class="app-title">水产养殖智能监控系统</h1>
+          <h1 class="app-title">智慧水产养殖系统</h1>
         </div>
         <div class="header-right">
           <div class="time-display">

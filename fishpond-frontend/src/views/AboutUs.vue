@@ -1,135 +1,217 @@
 <template>
   <div class="about-us-container">
-    <div class="about-section">
-      <h2 class="section-title">智能养鱼解决方案</h2>
-      <div class="about-content">
-        <p>
-          我们致力于将先进的物联网技术应用于水产养殖领域，打造智能化、数字化的现代养殖模式。通过实时监控水质参数、自动化控制设备以及数据分析，我们的系统能够有效提高养殖效率、降低风险、增加产量。</p>
-        <p>
-          我们的系统实现了全天候的水质监测，包括温度、pH值、溶解氧、氨氮等关键参数，并根据鱼类生长需求，自动调节水环境，保障鱼类健康成长。</p>
+    <!-- 版本信息区域 -->
+    <div class="version-info-section">
+      <div class="header-content">
+        <div class="image-container">
+          <img src="@/assets/brand.png" alt="brand" class="responsive-image"/>
+        </div>
       </div>
-    </div>
 
-    <div class="about-section">
-      <h2 class="section-title">核心优势</h2>
-      <div class="advantage-cards">
-        <div class="advantage-card">
-          <el-icon class="advantage-icon">
-            <Monitor/>
-          </el-icon>
-          <h3>实时监控</h3>
-          <p>全天候监测水质参数，及时预警异常情况</p>
+      <div class="version-buttons">
+        <button class="version-button update-button" @click="showUpdateTip">版本升级</button>
+        <button class="version-button log-button" @click="showChangeLog">查看升级日志</button>
+      </div>
+
+      <div class="current-version">
+        <span class="version-label">当前版本：</span>
+        <span class="version-number">v2.1.0</span>
+      </div>
+
+      <div class="project-info">
+        <div class="project-title">
+          慧水产养殖系统
         </div>
-        <div class="advantage-card">
-          <el-icon class="advantage-icon">
-            <SetUp/>
-          </el-icon>
-          <h3>智能控制</h3>
-          <p>自动化调节系统，维持最佳养殖环境</p>
-        </div>
-        <div class="advantage-card">
-          <el-icon class="advantage-icon">
-            <DataAnalysis/>
-          </el-icon>
-          <h3>数据分析</h3>
-          <p>深度分析养殖数据，优化养殖策略</p>
-        </div>
-        <div class="advantage-card">
-          <el-icon class="advantage-icon">
-            <Connection/>
-          </el-icon>
-          <h3>远程管理</h3>
-          <p>随时随地监控和管理养殖环境</p>
+        <div class="project-members">
+          指导老师：管华、雷用敏 || 组长：胡智坤 || 成员：刘希文、汪润、梁婧怡、刘焱平
         </div>
       </div>
     </div>
 
-    <div class="about-section">
-      <h2 class="section-title">团队介绍</h2>
-      <div class="team-info">
-        <div class="team-section">
-          <h3>指导老师</h3>
-          <div class="member-list">
-            <div class="member-card">
-              <div class="member-info">
-                <h4>管华</h4>
-              </div>
+    <!-- 版本升级提示弹窗 -->
+    <Transition name="fade">
+      <div class="modal" v-if="isUpdateTipVisible">
+        <Transition name="popup">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>版本提示</h3>
+              <span class="close-btn" @click="isUpdateTipVisible = false">&times;</span>
             </div>
-            <div class="member-card">
-              <div class="member-info">
-                <h4>雷用敏</h4>
+            <div class="modal-body">
+              <!-- 加载中状态 -->
+              <div v-if="isLoading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p>检查更新中...</p>
               </div>
+              <!-- 已是最新版本提示 -->
+              <p v-else>已经是最新版本了</p>
+            </div>
+            <div class="modal-footer">
+              <button class="confirm-btn" @click="isUpdateTipVisible = false">确定</button>
             </div>
           </div>
-        </div>
+        </Transition>
+      </div>
+    </Transition>
 
-        <div class="team-section">
-          <h3>核心成员</h3>
-          <div class="member-list">
-            <div class="member-card">
-              <div class="member-info">
-                <h4>胡智坤</h4>
-                <p>项目负责人，系统架构师，原神专家，资深轮椅玩家</p>
+    <!-- 升级日志弹窗 -->
+    <Transition name="fade">
+      <div class="modal" v-if="isChangeLogVisible">
+        <Transition name="popup">
+          <div class="modal-content changelog-content">
+            <div class="modal-header">
+              <h3>升级日志</h3>
+              <span class="close-btn" @click="isChangeLogVisible = false">&times;</span>
+            </div>
+            <div class="modal-body">
+              <div class="changelog">
+                <div class="changelog-item">
+                  <h4>v2.1.0 (当前版本)</h4>
+                  <ul>
+                    <li>新增水质实时监控大屏展示</li>
+                    <li>优化传感器数据采集稳定性</li>
+                    <li>改进数据图表展示效果</li>
+                    <li>修复若干已知问题</li>
+                  </ul>
+                </div>
+                <div class="changelog-item">
+                  <h4>v2.0.0</h4>
+                  <ul>
+                    <li>全新界面设计，提升用户体验</li>
+                    <li>增加多设备管理功能</li>
+                    <li>支持远程控制和参数设置</li>
+                    <li>增强系统安全性</li>
+                  </ul>
+                </div>
+                <div class="changelog-item">
+                  <h4>v1.5.0</h4>
+                  <ul>
+                    <li>增加数据导出功能</li>
+                    <li>优化响应速度和性能</li>
+                    <li>新增用户权限管理</li>
+                  </ul>
+                </div>
               </div>
             </div>
-            <div class="member-card">
-              <div class="member-info">
-                <h4>刘希文</h4>
-                <p>cfm专家,资深突破手，81专业工程师</p>
-              </div>
-            </div>
-            <div class="member-card">
-              <div class="member-info">
-                <h4>汪润</h4>
-                <p>软件工程师，前端开发</p>
-              </div>
-            </div>
-            <div class="member-card">
-              <div class="member-info">
-                <h4>刘焱平</h4>
-                <p>数据分析师，算法专家</p>
-              </div>
-            </div>
-            <div class="member-card">
-              <div class="member-info">
-                <h4>梁婧怡</h4>
-                <p>美术设计师，视频创作</p>
-              </div>
+            <div class="modal-footer">
+              <button class="confirm-btn" @click="isChangeLogVisible = false">关闭</button>
             </div>
           </div>
-        </div>
+        </Transition>
       </div>
-    </div>
-<!--    <div class="about-section">-->
-<!--      <h2 class="section-title">感谢</h2>-->
-<!--      <div class="about-content">-->
-<!--        <div class="content-layout">-->
-<!--          <div class="image-gallery">-->
-<!--            <div class="gallery-item">-->
-<!--              <img src="/CoachLiu.png" alt="Coach Liu">-->
-<!--            </div>-->
-<!--            <div class="gallery-item">-->
-<!--              <img src="/CoachLiu.png" alt="Coach Liu">-->
-<!--            </div>-->
-<!--            <div class="gallery-item">-->
-<!--              <img src="/CoachLiu.png" alt="Coach Liu">-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
+    </Transition>
   </div>
 </template>
 
 <script setup>
 import {Monitor, SetUp, DataAnalysis, Connection} from '@element-plus/icons-vue'
+import { ref } from 'vue'
+
+// 弹窗控制变量
+const isUpdateTipVisible = ref(false)
+const isChangeLogVisible = ref(false)
+const isLoading = ref(false)
+
+// 显示版本升级提示
+const showUpdateTip = () => {
+  isLoading.value = true
+  isUpdateTipVisible.value = true
+  
+  // 0.5秒后隐藏加载状态
+  setTimeout(() => {
+    isLoading.value = false
+  }, 500)
+}
+
+// 显示升级日志
+const showChangeLog = () => {
+  isChangeLogVisible.value = true
+}
 </script>
 
 <style scoped>
 .about-us-container {
-  padding: 20px;
+  padding: 10px;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+/* 版本信息样式 */
+.version-info-section {
+  margin-bottom: 40px;
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.logo-container {
+  margin-bottom: 20px;
+}
+
+.version-logo {
+  width: 80px;
+  height: 80px;
+}
+
+.version-buttons {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 500px;
+  justify-content: center;
+}
+
+.version-button {
+  padding: 10px 0;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.update-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.log-button {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.current-version {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.version-number {
+  font-weight: bold;
+  color: #333;
+}
+
+.project-info {
+  text-align: center;
+  width: 100%;
+}
+
+.project-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.project-members {
+  font-size: 14px;
+  color: #666;
 }
 
 .about-section {
@@ -325,4 +407,171 @@ import {Monitor, SetUp, DataAnalysis, Connection} from '@element-plus/icons-vue'
     max-width: 100%;
   }
 }
-</style> 
+
+.responsive-image {
+  max-width: 80%;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70%;
+  margin: 0 auto;
+}
+
+.header-content {
+  margin-bottom: 10px;
+}
+
+.copyright-info {
+  text-align: center;
+  color: #667085;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* 弹窗样式 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.changelog-content {
+  max-width: 600px;
+}
+
+.modal-header {
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.close-btn {
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-body {
+  padding: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #eee;
+}
+
+.confirm-btn {
+  padding: 8px 20px;
+  background-color: #5E6AD2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* 升级日志样式 */
+.changelog {
+  color: #333;
+}
+
+.changelog-item {
+  margin-bottom: 20px;
+}
+
+.changelog-item h4 {
+  color: #5E6AD2;
+  margin: 0 0 10px 0;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+.changelog-item ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.changelog-item li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+/* 弹窗动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.popup-enter-active,
+.popup-leave-active {
+  transition: all 0.3s ease;
+}
+
+.popup-enter-from,
+.popup-leave-to {
+  transform: scale(0.8);
+  opacity: 0;
+}
+
+/* 加载中图标样式 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #5E6AD2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
