@@ -113,15 +113,9 @@ if [ "$all_running" = true ]; then
     # 获取服务器IP
     SERVER_IP=$(hostname -I | awk '{print $1}')
     
-    if [[ "$need_ssl" =~ ^[Yy]$ ]]; then
-        print_green "您可以通过以下地址访问系统:"
-        print_green "HTTPS: https://$SERVER_IP:8086"
-        print_green "HTTP:  http://$SERVER_IP:8085"
-    else
-        print_green "您可以通过以下地址访问系统:"
-        print_green "HTTP: http://$SERVER_IP:80"
-    fi
-    
+    print_green "您可以通过以下地址访问系统:"
+    print_green "HTTP: http://$SERVER_IP:8086"
+
     echo ""
     print_yellow "前端服务: 80/443 (Docker)"
     print_yellow "后端服务: 10086"
