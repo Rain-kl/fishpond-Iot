@@ -65,7 +65,7 @@ const controlDevice = async (gesture) => {
   if (gestureDeviceMap[gesture]) {
     try {
       const device = gestureDeviceMap[gesture];
-      const response = await controllerApi.toggleDevice(device.id, 'on');
+      const response = await controllerApi.toggleDevice(device.id, "1");
       controlResult.value = `已开启${device.name}`;
       console.log(`设备控制成功:`, response);
     } catch (err) {
