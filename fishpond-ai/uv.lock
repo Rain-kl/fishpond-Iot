@@ -186,7 +186,7 @@ dependencies = [
 requires-dist = [
     { name = "fastapi", specifier = ">=0.115.12" },
     { name = "loguru", specifier = ">=0.7.3" },
-    { name = "mediapipe", specifier = ">=0.10.21" },
+    { name = "mediapipe", specifier = ">=0.10.18" },
     { name = "numpy", specifier = ">=1.26.4" },
     { name = "opencv-python", specifier = ">=4.11.0.86" },
     { name = "python-multipart", specifier = ">=0.0.20" },

@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onMounted} from 'vue';
-import {gestureApi} from '@/api';
+import {gestureApi, controllerApi} from '@/api';
 
 // 引用DOM元素
 const video = ref(null);
@@ -18,6 +18,16 @@ let autoModeInterval = null;
 const recognitionResult = ref('');
 const statusMessage = ref('请启动摄像头');
 const isRecognizing = ref(false);
+const controlResult = ref('');
+
+// 设备映射关系
+const gestureDeviceMap = {
+  '1': { id: 1, name: '进水阀' },
+  '2': { id: 2, name: '出水阀' },
+  '3': { id: 3, name: '增氧机' },
+  '4': { id: 4, name: '投饵机' },
+  '5': { id: 5, name: '灯光' }
+};
 
 // 启动摄像头
 const startCamera = async () => {
@@ -40,6 +50,30 @@ const startCamera = async () => {
   } catch (err) {
     console.error('访问摄像头出错:', err);
     statusMessage.value = `无法访问摄像头: ${err.message}`;
+  }
+};
+
+// 控制设备
+const controlDevice = async (gesture) => {
+  // 如果识别为手势0，不执行任何操作
+  if (gesture === '0') {
+    controlResult.value = '';
+    return;
+  }
+  
+  // 检查是否是1-5的手势
+  if (gestureDeviceMap[gesture]) {
+    try {
+      const device = gestureDeviceMap[gesture];
+      const response = await controllerApi.toggleDevice(device.id, 'on');
+      controlResult.value = `已开启${device.name}`;
+      console.log(`设备控制成功:`, response);
+    } catch (err) {
+      console.error('控制设备出错:', err);
+      controlResult.value = `控制设备失败: ${err.message}`;
+    }
+  } else {
+    controlResult.value = '';
   }
 };
 
@@ -68,6 +102,9 @@ const captureAndRecognize = async () => {
     const gestureResult = response.gesture || '未识别';
     recognitionResult.value = gestureResult;
 
+    // 根据手势结果控制设备
+    await controlDevice(gestureResult);
+
     console.log('手势识别结果:', response); // 调试输出
 
     statusMessage.value = autoModeActive.value ? '自动模式进行中...' : '识别完成';
@@ -75,6 +112,7 @@ const captureAndRecognize = async () => {
   } catch (err) {
     console.error('识别出错:', err);
     recognitionResult.value = '识别失败';
+    controlResult.value = '';
     statusMessage.value = `错误: ${err.message}`;
     isRecognizing.value = false;
 
@@ -154,9 +192,15 @@ onMounted(() => {
         </div>
 
         <div class="card-body">
-          <div class="result-display" v-if="recognitionResult">
-            <div class="result-label">识别结果</div>
-            <div class="result-value">{{ recognitionResult }}</div>
+          <div class="result-container">
+            <div class="result-display" v-if="recognitionResult">
+              <div class="result-label">识别结果</div>
+              <div class="result-value">{{ recognitionResult }}</div>
+            </div>
+            
+            <div class="device-control-result" v-if="controlResult">
+              <div class="control-status">{{ controlResult }}</div>
+            </div>
           </div>
           
           <div class="status-message" id="status">{{ statusMessage }}</div>
@@ -178,6 +222,15 @@ onMounted(() => {
               <i class="icon-stop"></i>
               停止自动
             </button>
+          </div>
+          
+          <div class="gesture-guide">
+            <div class="guide-header">手势控制说明：</div>
+            <div class="guide-item">手势1 → 开启进水阀</div>
+            <div class="guide-item">手势2 → 开启出水阀</div>
+            <div class="guide-item">手势3 → 开启增氧机</div>
+            <div class="guide-item">手势4 → 开启投饵机</div>
+            <div class="guide-item">手势5 → 开启灯光</div>
           </div>
         </div>
       </div>
@@ -325,6 +378,12 @@ onMounted(() => {
   }
 }
 
+.result-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .result-display {
   background-color: #F9F9FF;
   border-radius: 12px;
@@ -345,6 +404,20 @@ onMounted(() => {
   color: #5E6AD2;
 }
 
+.device-control-result {
+  background-color: #F0FDF4;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid #DCFCE7;
+}
+
+.control-status {
+  font-size: 18px;
+  font-weight: 500;
+  color: #12B76A;
+}
+
 .status-message {
   font-size: 14px;
   color: #667085;
@@ -358,6 +431,32 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 12px;
   justify-content: center;
+}
+
+.gesture-guide {
+  margin-top: 16px;
+  background-color: #F9FAFB;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #EAECF0;
+}
+
+.guide-header {
+  font-size: 15px;
+  font-weight: 600;
+  color: #344054;
+  margin-bottom: 12px;
+}
+
+.guide-item {
+  font-size: 14px;
+  color: #667085;
+  padding: 6px 0;
+  border-bottom: 1px dashed #EAECF0;
+}
+
+.guide-item:last-child {
+  border-bottom: none;
 }
 
 button {
